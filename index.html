@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FairwayAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --green: #1a7a4a;
+    --green-light: #22a862;
+    --green-glow: rgba(34,168,98,0.4);
+    --orange: #f4600c;
+    --orange-glow: rgba(244,96,12,0.4);
+    --dark: #0a0f0d;
+    --surface: #111a14;
+    --surface2: #1a2620;
+    --text: #e8f0eb;
+    --text-dim: #7a9a82;
+    --border: rgba(34,168,98,0.2);
+    --recording: #e63946;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── APP SHELL ── */
+  #app {
+    width: 100%;
+    height: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── STATUS BAR ── */
+  #statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 8px;
+    background: rgba(10,15,13,0.9);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--green-light);
+  }
+
+  .hole-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hole-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .hole-badge span {
+    color: var(--green-light);
+    font-weight: 600;
+  }
+
+  .shot-badge {
+    background: var(--orange);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+  }
+
+  /* ── MAIN VIEWPORT ── */
+  #viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── CAMERA PANEL ── */
+  #camera-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+  }
+
+  #camera-panel.hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Simulated viewfinder */
+  #viewfinder {
+    flex: 1;
+    background: #0d1a10;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vf-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 30% 60%, rgba(20,60,30,0.8) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 40%, rgba(15,40,20,0.6) 0%, transparent 50%),
+      linear-gradient(180deg, #1a3020 0%, #0d1a10 60%, #050a07 100%);
+  }
+
+  /* Simulated grass horizon */
+  .vf-ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, #1e4025 0%, #152d1a 100%);
+    border-top: 1px solid rgba(40,100,50,0.3);
+  }
+
+  .vf-sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background: linear-gradient(180deg, #8ab4c4 0%, #b8d4e0 60%, #d4e8ee 100%);
+    opacity: 0.15;
+  }
+
+  /* Framing guides */
+  .framing-guides {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Rule of thirds grid */
+  .grid-line {
+    position: absolute;
+    background: rgba(34,168,98,0.25);
+  }
+
+  .grid-h1 { width: 100%; height: 1px; top: 33.3%; }
+  .grid-h2 { width: 100%; height: 1px; top: 66.6%; }
+  .grid-v1 { height: 100%; width: 1px; left: 33.3%; }
+  .grid-v2 { height: 100%; width: 1px; left: 66.6%; }
+
+  /* Golfer framing box */
+  .frame-box {
+    position: absolute;
+    left: 15%;
+    top: 20%;
+    width: 35%;
+    height: 75%;
+    border: 1.5px solid rgba(34,168,98,0.6);
+    border-radius: 4px;
+  }
+
+  .frame-box::before {
+    content: 'GOLFER';
+    position: absolute;
+    top: -18px;
+    left: 0;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--green-light);
+    opacity: 0.8;
+  }
+
+  /* Corner brackets */
+  .corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--green-light);
+    border-style: solid;
+    opacity: 0.9;
+  }
+  .corner-tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+  .corner-tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+  /* Target line indicator */
+  .target-line {
+    position: absolute;
+    left: 33%;
+    top: 30%;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(244,96,12,0.5), rgba(244,96,12,0.8));
+  }
+
+  .target-line::before {
+    content: '▼ TARGET';
+    position: absolute;
+    top: -20px;
+    left: 4px;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--orange);
+    white-space: nowrap;
+  }
+
+  /* Camera mode label */
+  .cam-label {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(10,15,13,0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--green-light);
+  }
+
+  /* Simulated camera note */
+  .cam-note {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,15,13,0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Record button area */
+  #camera-controls {
+    background: rgba(10,15,13,0.95);
+    padding: 16px 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+
+  .cam-btn-secondary {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cam-btn-secondary:active { transform: scale(0.92); background: var(--surface); }
+
+  #record-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: transparent;
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  #record-btn .inner {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--recording);
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  #record-btn.recording .inner {
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    background: var(--recording);
+  }
+
+  #record-btn:active { transform: scale(0.94); }
+
+  .rec-timer {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--recording);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  #record-btn.recording .rec-timer { opacity: 1; }
+
+  /* ── DATA PANEL ── */
+  #data-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--dark);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #data-panel.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .data-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Geo-tag button */
+  #geotag-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .geo-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .geo-btn:active { transform: scale(0.96); }
+
+  .geo-btn.tagged {
+    border-color: var(--green-light);
+    background: rgba(34,168,98,0.1);
+  }
+
+  .geo-btn.tagged::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 12px;
+    color: var(--green-light);
+    font-weight: 700;
+  }
+
+  .geo-icon {
+    font-size: 24px;
+  }
+
+  .geo-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .geo-btn.tagged .geo-label { color: var(--green-light); }
+
+  .geo-coords {
+    font-size: 9px;
+    color: var(--text-dim);
+    font-family: monospace;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-align: center;
+  }
+
+  .geo-btn.tagged .geo-coords { opacity: 1; }
+
+  /* Distance display */
+  .distance-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .dist-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .dist-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--orange);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .dist-value span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: 2px;
+  }
+
+  /* Club selector */
+  .club-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .club-scroll::-webkit-scrollbar { display: none; }
+
+  .club-chip {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .club-chip:active { transform: scale(0.94); }
+
+  .club-chip.selected {
+    background: var(--green);
+    border-color: var(--green-light);
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Shot log */
+  .shot-log {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .shot-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .shot-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-light);
+    flex-shrink: 0;
+  }
+
+  .shot-details {
+    flex: 1;
+  }
+
+  .shot-club {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .shot-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .shot-dist {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--orange);
+    letter-spacing: 0.5px;
+  }
+
+  /* Log shot button */
+  #log-shot-btn {
+    margin: 0 20px;
+    padding: 16px;
+    background: var(--green);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px var(--green-glow);
+  }
+
+  #log-shot-btn:active { transform: scale(0.97); background: #156639; }
+  #log-shot-btn:disabled { opacity: 0.4; }
+
+  /* ── TOGGLE BAR ── */
+  #toggle-bar {
+    background: rgba(10,15,13,0.97);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px 16px;
+    display: flex;
+    gap: 0;
+    z-index: 100;
+  }
+
+  .toggle-track {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    padding: 3px;
+    position: relative;
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    bottom: 3px;
+    background: var(--green);
+    border-radius: 9px;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 2px 12px var(--green-glow);
+  }
+
+  .toggle-thumb.data-mode {
+    transform: translateX(calc(100% + 0px));
+    background: var(--orange);
+    box-shadow: 0 2px 12px var(--orange-glow);
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .toggle-btn.active { color: white; }
+
+  .toggle-icon { font-size: 15px; }
+
+  /* ── HOLE NAV ── */
+  .hole-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hole-nav-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: all 0.15s;
+  }
+
+  .hole-nav-btn:active { background: var(--surface); transform: scale(0.9); }
+
+  .hole-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--text);
+    line-height: 1;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  /* ── WIND SELECTOR ── */
+  .wind-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .wind-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .wind-btn:active { transform: scale(0.94); }
+
+  .wind-btn.selected {
+    border-color: var(--orange);
+    background: rgba(244,96,12,0.1);
+  }
+
+  .wind-arrow { font-size: 18px; }
+  .wind-label { font-size: 10px; color: var(--text-dim); font-weight: 500; }
+  .wind-btn.selected .wind-label { color: var(--orange); }
+
+  /* ── NOTIFICATIONS ── */
+  .toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background: var(--surface2);
+    border: 1px solid var(--green-light);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-light);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Pulse animation for geo btn */
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 var(--green-glow); }
+    70% { box-shadow: 0 0 0 10px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  .geo-btn.pulse { animation: pulse-ring 0.6s ease; }
+
+  /* Recording pulse */
+  @keyframes rec-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .rec-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--recording);
+    display: inline-block;
+    animation: rec-pulse 1s infinite;
+  }
+
+  .data-scroll-inner {
+    padding-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Status Bar -->
+  <div id="statusbar">
+    <div class="app-logo">FAIRWAY</div>
+    <div class="hole-info">
+      <div class="hole-badge">HOLE <span id="hole-display">1</span></div>
+      <div class="shot-badge">SHOT <span id="shot-display">1</span></div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Main Viewport -->
+  <div id="viewport">
+
+    <!-- CAMERA PANEL -->
+    <div id="camera-panel">
+      <div id="viewfinder">
+        <div class="vf-bg"></div>
+        <div class="vf-sky"></div>
+        <div class="vf-ground"></div>
+
+        <!-- Framing guides -->
+        <div class="framing-guides">
+          <div class="grid-line grid-h1"></div>
+          <div class="grid-line grid-h2"></div>
+          <div class="grid-line grid-v1"></div>
+          <div class="grid-line grid-v2"></div>
+          <div class="frame-box">
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+          </div>
+          <div class="target-line"></div>
+        </div>
+
+        <div class="cam-label">CAMERA</div>
+        <div class="cam-note">📷 Camera access requires native app</div>
+      </div>
+
+      <div id="camera-controls">
+        <div class="cam-btn-secondary" onclick="toggleGuides()" title="Toggle guides">⊞</div>
+        <div id="record-btn" onclick="toggleRecord()">
+          <div class="rec-timer"><span class="rec-dot"></span> <span id="rec-time">00:00</span></div>
+          <div class="inner"></div>
+        </div>
+        <div class="cam-btn-secondary" onclick="showToast('📸 Photo captured')">⚡</div>
+      </div>
+    </div>
+
+    <!-- DATA PANEL -->
+    <div id="data-panel" class="hidden">
+      <div class="data-scroll-inner">
+
+        <!-- Hole Navigation -->
+        <div class="data-section">
+          <div class="section-label">Hole</div>
+          <div class="hole-nav">
+            <div class="hole-nav-btn" onclick="changeHole(-1)">‹</div>
+            <div class="hole-num" id="hole-num-big">1</div>
+            <div class="hole-nav-btn" onclick="changeHole(1)">›</div>
+            <div style="flex:1"></div>
+            <div style="font-size:11px; color:var(--text-dim);">Par <span id="par-display" style="color:var(--text)">3</span> · <span id="yard-display" style="color:var(--orange)">155</span><span style="color:var(--text-dim)"> yds</span> · Hcp <span id="hcp-display" style="color:var(--text)">13</span></div>
+          </div>
+        </div>
+
+        <!-- Geo Tag -->
+        <div class="data-section">
+          <div class="section-label">Geo Tag</div>
+          <div id="geotag-area">
+            <div class="geo-btn" id="ball-tag" onclick="geoTag('ball')">
+              <div class="geo-icon">⛳</div>
+              <div class="geo-label">BALL POSITION</div>
+              <div class="geo-coords" id="ball-coords">—</div>
+            </div>
+            <div class="geo-btn" id="pin-tag" onclick="geoTag('pin')">
+              <div class="geo-icon">🚩</div>
+              <div class="geo-label">PIN POSITION</div>
+              <div class="geo-coords" id="pin-coords">—</div>
+            </div>
+          </div>
+          <div class="distance-display">
+            <div class="dist-label" id="dist-label">Distance to Pin</div>
+            <div class="dist-value" id="dist-to-pin">—<span id="dist-unit">yds</span></div>
+          </div>
+        </div>
+
+        <!-- Club Selection -->
+        <div class="data-section">
+          <div class="section-label">Club Selection</div>
+          <div class="club-scroll" id="club-scroll">
+            <div class="club-chip" onclick="selectClub(this, 'Driver')">Driver</div>
+            <div class="club-chip" onclick="selectClub(this, '3 Wood')">3 Wood</div>
+            <div class="club-chip" onclick="selectClub(this, '5 Wood')">5 Wood</div>
+            <div class="club-chip" onclick="selectClub(this, '4 Iron')">4 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, '5 Iron')">5 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, '6 Iron')">6 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, '7 Iron')">7 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, '8 Iron')">8 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, '9 Iron')">9 Iron</div>
+            <div class="club-chip" onclick="selectClub(this, 'PW')">PW</div>
+            <div class="club-chip" onclick="selectClub(this, 'GW')">GW</div>
+            <div class="club-chip" onclick="selectClub(this, 'SW')">SW</div>
+            <div class="club-chip" onclick="selectClub(this, 'LW')">LW</div>
+            <div class="club-chip" onclick="selectClub(this, 'Putter')">Putter</div>
+          </div>
+        </div>
+
+        <!-- Shot Type -->
+        <div class="data-section">
+          <div class="section-label">Shot Type</div>
+          <div class="club-scroll" id="shot-type-scroll">
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Tee Shot')">🏌️ Tee Shot</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Fairway Shot')">🌿 Fairway</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Rough Shot')">🌾 Rough</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Punch Out')">👊 Punch Out</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Fairway Bunker')">🏖️ F. Bunker</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Greenside Bunker')">⛱️ G. Bunker</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Greenside Chip')">🎯 Chip</div>
+            <div class="club-chip shot-type-chip" onclick="selectShotType(this, 'Green')">🟢 Green</div>
+          </div>
+        </div>
+
+        <!-- Wind -->
+        <div class="data-section" id="wind-section">
+          <div class="section-label">Wind</div>
+          <div class="wind-grid">
+            <div class="wind-btn" onclick="selectWind(this, 'Into')">
+              <div class="wind-arrow">↑</div>
+              <div class="wind-label">INTO</div>
+            </div>
+            <div class="wind-btn" onclick="selectWind(this, 'Down')">
+              <div class="wind-arrow">↓</div>
+              <div class="wind-label">DOWN</div>
+            </div>
+            <div class="wind-btn" onclick="selectWind(this, 'Left')">
+              <div class="wind-arrow">←</div>
+              <div class="wind-label">LEFT</div>
+            </div>
+            <div class="wind-btn" onclick="selectWind(this, 'Right')">
+              <div class="wind-arrow">→</div>
+              <div class="wind-label">RIGHT</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shot Log -->
+        <div class="data-section">
+          <div class="section-label">Shot Log — Hole <span id="log-hole">1</span></div>
+          <div class="shot-log" id="shot-log">
+            <div style="font-size:12px; color:var(--text-dim); text-align:center; padding:12px 0;">
+              No shots logged yet
+            </div>
+          </div>
+        </div>
+
+        <!-- Log Shot Button -->
+        <button id="log-shot-btn" onclick="logShot()">
+          <span>＋</span> Log Shot
+        </button>
+
+      </div>
+    </div>
+
+  </div><!-- /viewport -->
+
+  <!-- Toggle Bar -->
+  <div id="toggle-bar">
+    <div class="toggle-track">
+      <div class="toggle-thumb" id="toggle-thumb"></div>
+      <button class="toggle-btn active" id="btn-camera" onclick="switchMode('camera')">
+        <span class="toggle-icon">🎥</span> Camera
+      </button>
+      <button class="toggle-btn" id="btn-data" onclick="switchMode('data')">
+        <span class="toggle-icon">📊</span> Data
+      </button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  // ── STATE ──
+  let mode = 'camera';
+  let hole = 1;
+  let shotNum = 1;
+  let selectedClub = null;
+  let selectedWind = null;
+  let selectedShotType = null;
+  let isPutt = false;
+  let recording = false;
+  let recInterval = null;
+  let recSeconds = 0;
+  let ballTagged = false;
+  let pinTagged = false;
+  let ballCoords = null;
+  let pinCoords = null;
+  let shots = {};
+  let guidesVisible = true;
+  let toastTimeout = null;
+
+  const parMap = {1:3,2:4,3:3,4:4,5:4,6:4,7:3,8:5,9:4};
+  const yardMap = {1:155,2:402,3:165,4:377,5:400,6:304,7:200,8:546,9:397};
+  const hcpMap = {1:13,2:9,3:5,4:1,5:3,6:17,7:11,8:15,9:7};
+
+  // ── MODE TOGGLE ──
+  function switchMode(m) {
+    mode = m;
+    const cPanel = document.getElementById('camera-panel');
+    const dPanel = document.getElementById('data-panel');
+    const thumb = document.getElementById('toggle-thumb');
+    const btnCam = document.getElementById('btn-camera');
+    const btnData = document.getElementById('btn-data');
+
+    if (m === 'camera') {
+      cPanel.classList.remove('hidden');
+      dPanel.classList.add('hidden');
+      thumb.classList.remove('data-mode');
+      btnCam.classList.add('active');
+      btnData.classList.remove('active');
+    } else {
+      cPanel.classList.add('hidden');
+      dPanel.classList.remove('hidden');
+      thumb.classList.add('data-mode');
+      btnData.classList.add('active');
+      btnCam.classList.remove('active');
+    }
+  }
+
+  // ── HOLE NAV ──
+  function changeHole(dir) {
+    hole = Math.max(1, Math.min(9, hole + dir));
+    document.getElementById('hole-display').textContent = hole;
+    document.getElementById('hole-num-big').textContent = hole;
+    document.getElementById('log-hole').textContent = hole;
+    document.getElementById('shot-display').textContent = shotNum;
+    document.getElementById('par-display').textContent = parMap[hole] || 4;
+    document.getElementById('yard-display').textContent = yardMap[hole] || 0;
+    document.getElementById('hcp-display').textContent = hcpMap[hole] || 0;
+
+    // Reset geo tags for new hole
+    resetGeoTags();
+    updateShotLog();
+    showToast('Hole ' + hole);
+  }
+
+  // ── GEO TAG ──
+  function geoTag(type) {
+    const btn = document.getElementById(type + '-tag');
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), 600);
+
+    // Simulate GPS coords
+    const lat = (38.5836 + (Math.random() - 0.5) * 0.002).toFixed(5);
+    const lng = (-121.3766 + (Math.random() - 0.5) * 0.002).toFixed(5);
+
+    if (type === 'ball') {
+      ballTagged = true;
+      ballCoords = { lat, lng };
+      btn.classList.add('tagged');
+      document.getElementById('ball-coords').textContent = lat + ', ' + lng;
+      showToast('📍 Ball position tagged');
+    } else {
+      pinTagged = true;
+      pinCoords = { lat, lng };
+      btn.classList.add('tagged');
+      document.getElementById('pin-coords').textContent = lat + ', ' + lng;
+      showToast('🚩 Pin position tagged');
+    }
+
+    // Calculate distance if both tagged
+    if (ballTagged && pinTagged) {
+      const dist = isPutt
+        ? Math.floor(3 + Math.random() * 30)
+        : Math.floor(80 + Math.random() * 220);
+      const unit = isPutt ? 'ft' : 'yds';
+      document.getElementById('dist-to-pin').innerHTML = dist + '<span id="dist-unit">' + unit + '</span>';
+    }
+  }
+
+  function resetGeoTags() {
+    ballTagged = false;
+    pinTagged = false;
+    ballCoords = null;
+    pinCoords = null;
+    document.getElementById('ball-tag').classList.remove('tagged');
+    document.getElementById('pin-tag').classList.remove('tagged');
+    document.getElementById('ball-coords').textContent = '—';
+    document.getElementById('pin-coords').textContent = '—';
+    document.getElementById('dist-to-pin').innerHTML = '—<span>yds</span>';
+  }
+
+  // ── SHOT TYPE SELECT ──
+  function selectShotType(el, type) {
+    document.querySelectorAll('.shot-type-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedShotType = type;
+    isPutt = (type === 'Green');
+
+    // Update distance unit
+    document.getElementById('dist-unit').textContent = isPutt ? 'ft' : 'yds';
+    document.getElementById('dist-label').textContent = isPutt ? 'Putt Distance' : 'Distance to Pin';
+
+    // Hide wind for putting
+    document.getElementById('wind-section').style.display = isPutt ? 'none' : '';
+
+    // Hide club selector for putting
+    document.getElementById('club-scroll').parentElement.style.display = isPutt ? 'none' : '';
+
+    // Recalculate distance if already tagged
+    if (ballTagged && pinTagged) {
+      const dist = isPutt
+        ? Math.floor(3 + Math.random() * 30)
+        : Math.floor(80 + Math.random() * 220);
+      document.getElementById('dist-to-pin').innerHTML = dist + '<span id="dist-unit">' + (isPutt ? 'ft' : 'yds') + '</span>';
+    }
+
+    showToast('📍 ' + type);
+  }
+
+  // ── CLUB SELECT ──
+  function selectClub(el, club) {
+    document.querySelectorAll('.club-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedClub = club;
+    showToast('🏌️ ' + club + ' selected');
+  }
+
+  // ── WIND SELECT ──
+  function selectWind(el, wind) {
+    document.querySelectorAll('.wind-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedWind = wind;
+  }
+
+  // ── LOG SHOT ──
+  function logShot() {
+    if (!selectedClub && !isPutt) {
+      showToast('⚠️ Select a club first', true);
+      return;
+    }
+    if (!selectedShotType) {
+      showToast('⚠️ Select a shot type first', true);
+      return;
+    }
+
+    const dist = ballTagged && pinTagged
+      ? document.getElementById('dist-to-pin').textContent.replace(/yds|ft/,'').trim()
+      : '—';
+    const unit = isPutt ? 'ft' : 'yds';
+
+    if (!shots[hole]) shots[hole] = [];
+    shots[hole].push({
+      num: shotNum,
+      club: isPutt ? 'Putter' : selectedClub,
+      type: selectedShotType,
+      dist: dist,
+      unit: unit,
+      wind: selectedWind || '—',
+      time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+    });
+
+    shotNum++;
+    document.getElementById('shot-display').textContent = shotNum;
+    updateShotLog();
+    resetGeoTags();
+
+    // Reset shot type
+    document.querySelectorAll('.shot-type-chip').forEach(c => c.classList.remove('selected'));
+    selectedShotType = null;
+    isPutt = false;
+    document.getElementById('dist-unit').textContent = 'yds';
+    document.getElementById('dist-label').textContent = 'Distance to Pin';
+    document.getElementById('wind-section').style.display = '';
+    document.getElementById('club-scroll').parentElement.style.display = '';
+
+    showToast('✅ Shot ' + (shotNum - 1) + ' logged');
+    setTimeout(() => switchMode('camera'), 800);
+  }
+
+  function updateShotLog() {
+    const log = document.getElementById('shot-log');
+    const holeSshots = shots[hole] || [];
+
+    if (holeSshots.length === 0) {
+      log.innerHTML = '<div style="font-size:12px; color:var(--text-dim); text-align:center; padding:12px 0;">No shots logged yet</div>';
+      return;
+    }
+
+    log.innerHTML = holeSshots.map(s => `
+      <div class="shot-entry">
+        <div class="shot-num">${s.num}</div>
+        <div class="shot-details">
+          <div class="shot-club">${s.club} <span style="color:var(--text-dim);font-weight:400;font-size:11px">· ${s.type}</span></div>
+          <div class="shot-meta">Wind: ${s.wind} · ${s.time}</div>
+        </div>
+        <div class="shot-dist">${s.dist !== '—' ? s.dist + '<br><span style="font-size:10px;font-family:DM Sans,sans-serif;color:var(--text-dim)">' + s.unit + '</span>' : '—'}</div>
+      </div>
+    `).join('');
+  }
+
+  // ── RECORD ──
+  function toggleRecord() {
+    const btn = document.getElementById('record-btn');
+    recording = !recording;
+
+    if (recording) {
+      btn.classList.add('recording');
+      recSeconds = 0;
+      recInterval = setInterval(() => {
+        recSeconds++;
+        const m = String(Math.floor(recSeconds/60)).padStart(2,'0');
+        const s = String(recSeconds%60).padStart(2,'0');
+        document.getElementById('rec-time').textContent = m+':'+s;
+      }, 1000);
+      showToast('🔴 Recording');
+    } else {
+      btn.classList.remove('recording');
+      clearInterval(recInterval);
+      showToast('⏹ Clip saved · ' + document.getElementById('rec-time').textContent);
+      // Auto-switch to data mode after recording
+      setTimeout(() => switchMode('data'), 600);
+    }
+  }
+
+  // ── GUIDES TOGGLE ──
+  function toggleGuides() {
+    guidesVisible = !guidesVisible;
+    document.querySelectorAll('.framing-guides > *').forEach(el => {
+      el.style.opacity = guidesVisible ? '' : '0';
+    });
+    showToast(guidesVisible ? '⊞ Guides on' : '⊟ Guides off');
+  }
+
+  // ── TOAST ──
+  function showToast(msg, warn) {
+    const t = document.getElementById('toast');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    t.textContent = msg;
+    t.style.borderColor = warn ? 'var(--orange)' : 'var(--green-light)';
+    t.style.color = warn ? 'var(--orange)' : 'var(--green-light)';
+    t.classList.add('show');
+    toastTimeout = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+</script>
+</body>
+</html>
