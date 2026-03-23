@@ -5,1492 +5,284 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#080c0a">
 <title>FairwayAI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-:root {
-  --bg: #080c0a;
-  --surface: #0f1712;
-  --surface2: #162019;
-  --surface3: #1c2b22;
-  --green: #1db954;
-  --green-dim: #148a3d;
-  --green-glow: rgba(29,185,84,0.35);
-  --orange: #ff6b1a;
-  --orange-glow: rgba(255,107,26,0.35);
-  --red: #e63946;
-  --text: #eef4f0;
-  --text-dim: #6b8f74;
-  --text-muted: #3d5944;
-  --border: rgba(29,185,84,0.15);
-  --border-bright: rgba(29,185,84,0.4);
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  overflow: hidden;
-  user-select: none;
-}
-
-#app {
-  width: 100%;
-  height: 100%;
-  max-width: 430px;
-  margin: 0 auto;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-}
-
-/* ── VIEWFINDER ── */
-#viewfinder {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  background: #050a07;
-}
-
-.vf-scene {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 25% 55%, rgba(18,52,26,0.9) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 35%, rgba(12,36,18,0.7) 0%, transparent 50%),
-    linear-gradient(180deg, #0a1a0e 0%, #06100a 55%, #030806 100%);
-}
-
-.vf-ground {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 42%;
-  background: linear-gradient(180deg, #172b1c 0%, #0e1f12 100%);
-  border-top: 1px solid rgba(30,80,40,0.25);
-}
-
-.vf-sky-glow {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(135,190,155,0.08) 0%, transparent 100%);
-}
-
-/* ── FRAMING GUIDES ── */
-#guides {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.guide-thirds-h {
-  position: absolute;
-  left: 0; right: 0;
-  height: 1px;
-  background: rgba(29,185,84,0.18);
-}
-.guide-thirds-h:nth-child(1) { top: 33.3%; }
-.guide-thirds-h:nth-child(2) { top: 66.6%; }
-
-.guide-thirds-v {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 1px;
-  background: rgba(29,185,84,0.18);
-}
-.guide-thirds-v:nth-child(3) { left: 33.3%; }
-.guide-thirds-v:nth-child(4) { left: 66.6%; }
-
-.guide-golfer {
-  position: absolute;
-  left: 12%;
-  top: 18%;
-  width: 32%;
-  height: 78%;
-  border: 1.5px solid rgba(29,185,84,0.5);
-  border-radius: 4px;
-}
-
-.guide-golfer::before {
-  content: 'SUBJECT';
-  position: absolute;
-  top: -18px; left: 0;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--green);
-  opacity: 0.7;
-}
-
-.g-corner {
-  position: absolute;
-  width: 14px; height: 14px;
-  border-color: var(--green);
-  border-style: solid;
-}
-.g-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.g-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
-.g-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
-.g-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-
-.guide-target {
-  position: absolute;
-  left: 30%;
-  top: 25%;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(255,107,26,0.4), rgba(255,107,26,0.7));
-}
-
-.guide-target::before {
-  content: '▼ PIN';
-  position: absolute;
-  top: -18px; left: 4px;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--orange);
-  white-space: nowrap;
-}
-
-/* ── HOLE INDICATOR (top overlay) ── */
-#hole-indicator {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 10;
-}
-
-.hole-pill {
-  background: rgba(8,12,10,0.82);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-bright);
-  border-radius: 30px;
-  padding: 6px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.hole-pill:active { transform: scale(0.95); }
-
-.hole-pill-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.hole-pill-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px;
-  color: var(--text);
-  line-height: 1;
-}
-
-.hole-pill-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.hole-pill-par {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--green);
-}
-
-.hole-pill-yds {
-  font-size: 10px;
-  color: var(--text-dim);
-}
-
-.edit-hole-btn {
-  background: rgba(8,12,10,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.edit-hole-btn:active { background: var(--surface2); color: var(--text); }
-
-/* ── GEO TAGS (camera overlay) ── */
-#geo-overlay {
-  position: absolute;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
-  display: flex;
-  gap: 10px;
-  z-index: 10;
-}
-
-.geo-tag-btn {
-  flex: 1;
-  background: rgba(8,12,10,0.82);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.25s;
-  position: relative;
-  overflow: hidden;
-}
-
-.geo-tag-btn:active { transform: scale(0.96); }
-
-.geo-tag-btn.tagged {
-  border-color: var(--green);
-  background: rgba(29,185,84,0.12);
-}
-
-.geo-tag-icon { font-size: 20px; flex-shrink: 0; }
-
-.geo-tag-info { flex: 1; min-width: 0; }
-
-.geo-tag-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.geo-tag-btn.tagged .geo-tag-label { color: var(--green); }
-
-.geo-tag-value {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  line-height: 1.1;
-  transition: color 0.3s;
-}
-
-.geo-tag-btn.tagged .geo-tag-value { color: var(--orange); }
-
-/* Distance display between geo tags */
-#dist-display {
-  position: absolute;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(8,12,10,0.88);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--orange);
-  border-radius: 30px;
-  padding: 6px 18px;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.4s, transform 0.4s;
-  transform: translateX(-50%) translateY(10px);
-  z-index: 10;
-  pointer-events: none;
-}
-
-#dist-display.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.dist-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  color: var(--orange);
-  letter-spacing: 1px;
-  line-height: 1;
-}
-
-.dist-unit-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-}
-
-/* ── CAMERA CONTROLS ── */
-#camera-controls {
-  background: rgba(8,12,10,0.96);
-  border-top: 1px solid var(--border);
-  padding: 16px 24px 28px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  z-index: 20;
-}
-
-.ctrl-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition: all 0.2s;
-  color: var(--text-dim);
-}
-
-.ctrl-btn:active { transform: scale(0.9); background: var(--surface3); }
-
-.ctrl-btn.active-btn {
-  border-color: var(--green);
-  color: var(--green);
-}
-
-/* Record button */
-#record-btn {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  background: transparent;
-  border: 3px solid rgba(255,255,255,0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s;
-}
-
-#record-btn:active { transform: scale(0.93); }
-
-#record-inner {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--red);
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 0 20px rgba(230,57,70,0.5);
-}
-
-#record-btn.recording #record-inner {
-  border-radius: 10px;
-  width: 30px;
-  height: 30px;
-}
-
-.rec-timer {
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--red);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-#record-btn.recording .rec-timer { opacity: 1; }
-
-.rec-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--red);
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-/* ── DATA SHEET (slides up) ── */
-#data-sheet-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  z-index: 50;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s;
-}
-
-#data-sheet-overlay.open {
-  opacity: 1;
-  pointer-events: all;
-}
-
-#data-sheet {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border-bright);
-  border-radius: 24px 24px 0 0;
-  padding: 0 0 40px;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  max-height: 88vh;
-  overflow-y: auto;
-}
-
-#data-sheet-overlay.open #data-sheet {
-  transform: translateY(0);
-}
-
-.sheet-handle {
-  width: 40px; height: 4px;
-  background: var(--text-muted);
-  border-radius: 2px;
-  margin: 14px auto 20px;
-}
-
-.sheet-header {
-  padding: 0 20px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-}
-
-.sheet-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  letter-spacing: 1.5px;
-  color: var(--text);
-}
-
-.sheet-hole-badge {
-  background: var(--surface2);
-  border: 1px solid var(--border-bright);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green);
-}
-
-.sheet-section {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.sheet-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-/* Score input */
-.score-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.score-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-dim);
-}
-
-.score-stepper {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.step-btn {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  color: var(--text-dim);
-  transition: all 0.15s;
-}
-
-.step-btn:active { transform: scale(0.88); background: var(--surface3); }
-
-.score-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px;
-  color: var(--text);
-  min-width: 36px;
-  text-align: center;
-  line-height: 1;
-}
-
-/* Three-option selector (FIR/GIR) */
-.tri-selector {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.tri-btn {
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.tri-btn:active { transform: scale(0.94); }
-
-.tri-btn.selected {
-  border-color: var(--green);
-  background: rgba(29,185,84,0.1);
-}
-
-.tri-btn.selected-miss {
-  border-color: var(--orange);
-  background: rgba(255,107,26,0.1);
-}
-
-.tri-icon { font-size: 18px; }
-.tri-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.tri-btn.selected .tri-label { color: var(--green); }
-.tri-btn.selected-miss .tri-label { color: var(--orange); }
-
-/* Five-option selector for GIR misses */
-.five-selector {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin-top: 8px;
-}
-
-/* Club chips */
-.chip-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.chip-scroll::-webkit-scrollbar { display: none; }
-
-.chip {
-  flex-shrink: 0;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.chip:active { transform: scale(0.94); }
-.chip.selected {
-  background: var(--green-dim);
-  border-color: var(--green);
-  color: white;
-  font-weight: 600;
-}
-
-/* Shot rows */
-.shot-rows { display: flex; flex-direction: column; gap: 10px; }
-
-.shot-row {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.shot-row-num {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--green);
-  flex-shrink: 0;
-}
-
-.shot-row-fields {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.shot-row-label {
-  font-size: 11px;
-  color: var(--text-dim);
-  font-weight: 500;
-}
-
-/* Lie selector */
-.lie-selector {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.lie-chip {
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.lie-chip:active { transform: scale(0.94); }
-.lie-chip.selected {
-  border-color: var(--orange);
-  color: var(--orange);
-  background: rgba(255,107,26,0.08);
-}
-
-/* Save button */
-.save-btn {
-  margin: 16px 20px 0;
-  padding: 15px;
-  background: var(--green-dim);
-  border: none;
-  border-radius: var(--radius);
-  color: white;
-  font-family: 'Outfit', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
-  box-shadow: 0 4px 24px var(--green-glow);
-  width: calc(100% - 40px);
-}
-
-.save-btn:active { transform: scale(0.97); background: #0f6e2e; }
-
-/* ── HOLE EDIT SHEET ── */
-#hole-sheet-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  z-index: 60;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: flex-end;
-}
-
-#hole-sheet-overlay.open {
-  opacity: 1;
-  pointer-events: all;
-}
-
-#hole-sheet {
-  width: 100%;
-  background: var(--surface);
-  border-top: 1px solid var(--border-bright);
-  border-radius: 24px 24px 0 0;
-  padding: 0 20px 48px;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-#hole-sheet-overlay.open #hole-sheet {
-  transform: translateY(0);
-}
-
-.hole-grid {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.hole-cell {
-  aspect-ratio: 1;
-  border-radius: 8px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.hole-cell:active { transform: scale(0.9); }
-
-.hole-cell.current {
-  background: var(--green-dim);
-  border-color: var(--green);
-  color: white;
-}
-
-.hole-cell-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.hole-cell-par {
-  font-size: 8px;
-  font-weight: 500;
-  opacity: 0.7;
-}
-
-/* ── DATA BUTTON (floating) ── */
-#data-fab {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: rgba(8,12,10,0.82);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 30px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  z-index: 10;
-}
-
-#data-fab:active { transform: scale(0.94); }
-
-#data-fab.has-data {
-  border-color: var(--green);
-}
-
-.fab-icon { font-size: 14px; }
-.fab-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-#data-fab.has-data .fab-label { color: var(--green); }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed;
-  top: 72px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-8px);
-  background: var(--surface2);
-  border: 1px solid var(--green);
-  border-radius: 30px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--green);
-  opacity: 0;
-  transition: all 0.3s;
-  z-index: 999;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-#toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-#toast.warn {
-  border-color: var(--orange);
-  color: var(--orange);
-}
-
-/* ── PULSE ANIMATION ── */
-@keyframes geo-pulse {
-  0% { box-shadow: 0 0 0 0 var(--green-glow); }
-  70% { box-shadow: 0 0 0 12px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-
-.pulse-once { animation: geo-pulse 0.6s ease; }
-
-/* ── RECORDED CLIPS INDICATOR ── */
-#clips-indicator {
-  position: absolute;
-  bottom: 105px;
-  right: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-end;
-  z-index: 10;
-}
-
-.clip-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 6px rgba(230,57,70,0.6);
-  animation: fadeInDot 0.3s ease;
-}
-
-@keyframes fadeInDot {
-  from { opacity: 0; transform: scale(0); }
-  to { opacity: 1; transform: scale(1); }
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#080c0a;--s:#0f1712;--s2:#162019;--s3:#1c2b22;--gr:#1db954;--grd:#148a3d;--gg:rgba(29,185,84,0.35);--or:#ff6b1a;--og:rgba(255,107,26,0.35);--rd:#e63946;--bl:#3a86ff;--tx:#eef4f0;--td:#6b8f74;--tm:#3d5944;--br:rgba(29,185,84,0.15);--bb:rgba(29,185,84,0.4);--r:16px;--rs:10px;}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;overflow:hidden;user-select:none;}
+#app{width:100%;height:100%;max-width:430px;margin:0 auto;position:relative;display:flex;flex-direction:column;background:var(--bg);transition:max-width .4s;}
+#app.bc{max-width:100%;}
+#banner{background:var(--s);border-bottom:1px solid var(--br);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;z-index:20;flex-shrink:0;gap:10px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gr);}
+.mt{display:flex;background:var(--s2);border:1px solid var(--br);border-radius:30px;padding:3px;gap:2px;}
+.mb{padding:5px 10px;border-radius:24px;font-size:10px;font-weight:700;letter-spacing:.8px;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:4px;color:var(--tm);}
+.mb.as{background:var(--bl);color:white;box-shadow:0 2px 10px rgba(58,134,255,.35);}
+.mb.ab{background:var(--or);color:white;box-shadow:0 2px 10px var(--og);}
+.hp{display:flex;align-items:center;gap:6px;cursor:pointer;background:var(--s2);border:1px solid var(--bb);border-radius:20px;padding:5px 10px;transition:all .2s;}
+.hp:active{transform:scale(.94);}
+.hpn{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--tx);line-height:1;}
+.hpm{display:flex;flex-direction:column;}
+.hpp{font-size:9px;font-weight:700;color:var(--gr);}
+.hpy{font-size:9px;color:var(--td);}
+#vf{position:relative;overflow:hidden;background:#050a07;}
+#app:not(.bc) #vf{flex:1;}
+#app.bc #vf{width:100%;aspect-ratio:16/9;flex-shrink:0;}
+.vb{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 55%,rgba(18,52,26,.9) 0%,transparent 55%),radial-gradient(ellipse at 75% 35%,rgba(12,36,18,.7) 0%,transparent 50%),linear-gradient(180deg,#0a1a0e 0%,#06100a 55%,#030806 100%);}
+.vg{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(180deg,#172b1c 0%,#0e1f12 100%);border-top:1px solid rgba(30,80,40,.2);}
+.vs{position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(135,190,155,.07) 0%,transparent 100%);}
+.mbadge{position:absolute;top:10px;right:10px;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:2px;z-index:5;}
+#app:not(.bc) .mbadge{color:var(--bl);border:1px solid rgba(58,134,255,.4);background:rgba(8,12,10,.75);}
+#app.bc .mbadge{color:var(--or);border:1px solid rgba(255,107,26,.4);background:rgba(8,12,10,.75);}
+#guides{position:absolute;inset:0;pointer-events:none;transition:opacity .3s;}
+.gl{position:absolute;background:rgba(29,185,84,.15);}
+.gh1{left:0;right:0;height:1px;top:33.3%;}.gh2{left:0;right:0;height:1px;top:66.6%;}
+.gv1{top:0;bottom:0;width:1px;left:33.3%;}.gv2{top:0;bottom:0;width:1px;left:66.6%;}
+.gsub{position:absolute;border:1.5px solid rgba(29,185,84,.55);border-radius:4px;transition:all .4s;}
+#app:not(.bc) .gsub{left:8%;top:25%;width:22%;height:60%;}
+#app.bc .gsub{left:10%;top:15%;width:18%;height:70%;}
+.gsub::before{content:'SUBJECT';position:absolute;top:-16px;left:0;font-size:8px;font-weight:700;letter-spacing:2px;color:var(--gr);opacity:.65;}
+.gc{position:absolute;width:12px;height:12px;border-color:var(--gr);border-style:solid;}
+.gc.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}.gc.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.gc.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}.gc.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.gtgt{position:absolute;width:1px;background:linear-gradient(180deg,transparent,rgba(255,107,26,.35),rgba(255,107,26,.65));transition:all .4s;}
+#app:not(.bc) .gtgt{left:28%;top:20%;bottom:0;}
+#app.bc .gtgt{left:30%;top:10%;bottom:0;}
+.gtgt::before{content:'▼ PIN';position:absolute;top:-16px;left:4px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--or);white-space:nowrap;}
+#ci{position:absolute;top:10px;left:10px;display:flex;gap:4px;z-index:10;}
+.cd{width:7px;height:7px;border-radius:50%;background:var(--rd);box-shadow:0 0 5px rgba(230,57,70,.6);animation:pi .3s ease;}
+@keyframes pi{from{opacity:0;transform:scale(0);}to{opacity:1;transform:scale(1);}}
+#dp{position:absolute;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(8,12,10,.9);backdrop-filter:blur(12px);border:1px solid var(--or);border-radius:30px;padding:5px 16px;display:flex;align-items:baseline;gap:4px;opacity:0;transition:opacity .4s,transform .4s;z-index:10;pointer-events:none;white-space:nowrap;}
+#app:not(.bc) #dp{bottom:85px;}
+#app.bc #dp{bottom:70px;}
+#dp.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.dn{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--or);line-height:1;}
+.du{font-size:11px;font-weight:600;color:var(--td);}
+#geo{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;z-index:10;}
+.gb{flex:1;background:rgba(8,12,10,.82);backdrop-filter:blur(12px);border:1.5px solid var(--br);border-radius:var(--rs);padding:9px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .25s;}
+.gb:active{transform:scale(.95);}
+.gb.tg{border-color:var(--gr);background:rgba(29,185,84,.1);}
+.gi{font-size:18px;flex-shrink:0;}
+.gl2{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--td);text-transform:uppercase;}
+.gb.tg .gl2{color:var(--gr);}
+.gv2{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--tm);line-height:1.1;transition:color .3s;}
+.gb.tg .gv2{color:var(--or);}
+#prom{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:40;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+#prom.show{opacity:1;pointer-events:all;}
+.pc{background:var(--s);border:1px solid var(--bb);border-radius:20px;padding:22px 18px;width:88%;max-width:320px;display:flex;flex-direction:column;gap:12px;animation:su .3s ease;}
+@keyframes su{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;text-align:center;}
+.ps{font-size:11px;color:var(--td);text-align:center;margin-top:-6px;}
+.pi2{background:var(--s2);border:1px solid var(--br);border-radius:10px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;}
+.pd{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--rd);}
+.pmb{font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:10px;}
+.pmb.social{background:rgba(58,134,255,.15);color:var(--bl);border:1px solid rgba(58,134,255,.3);}
+.pmb.broadcast{background:rgba(255,107,26,.15);color:var(--or);border:1px solid rgba(255,107,26,.3);}
+.pa{display:flex;flex-direction:column;gap:7px;}
+.pb{padding:11px;border-radius:12px;border:1.5px solid var(--br);background:var(--s2);color:var(--tx);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all .2s;}
+.pb:active{transform:scale(.97);}
+.pb.pr{background:var(--grd);border-color:var(--gr);box-shadow:0 3px 12px var(--gg);}
+.pb.sk{color:var(--tm);justify-content:center;border-color:transparent;background:transparent;}
+.pbi{font-size:17px;}
+.pbm{font-weight:600;}
+.pbh{font-size:10px;color:var(--td);font-weight:400;}
+#bbar{display:none;background:rgba(255,107,26,.07);border-top:1px solid rgba(255,107,26,.2);padding:5px 14px;font-size:9px;color:var(--or);font-weight:700;letter-spacing:.5px;text-align:center;flex-shrink:0;}
+#app.bc #bbar{display:block;}
+#ctrl{background:rgba(8,12,10,.97);border-top:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;z-index:20;flex-shrink:0;}
+#app:not(.bc) #ctrl{padding:14px 24px 28px;}
+#app.bc #ctrl{padding:10px 24px 14px;flex:1;}
+.cb{width:46px;height:46px;border-radius:50%;background:var(--s2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;transition:all .2s;color:var(--td);}
+.cb:active{transform:scale(.88);background:var(--s3);}
+.cb.on{border-color:var(--gr);color:var(--gr);}
+#rb{width:72px;height:72px;border-radius:50%;background:transparent;border:3px solid rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s;}
+#rb:active{transform:scale(.92);}
+#ri{width:56px;height:56px;border-radius:50%;background:var(--rd);transition:all .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 18px rgba(230,57,70,.45);}
+#rb.rec #ri{border-radius:10px;width:28px;height:28px;}
+.rt{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--rd);white-space:nowrap;opacity:0;transition:opacity .3s;display:flex;align-items:center;gap:4px;}
+#rb.rec .rt{opacity:1;}
+.rdot{width:6px;height:6px;border-radius:50%;background:var(--rd);animation:bl 1s infinite;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.2;}}
+#db{width:46px;height:46px;border-radius:50%;background:var(--s2);border:1px solid var(--br);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;gap:1px;}
+#db:active{transform:scale(.88);}
+#db.on{border-color:var(--gr);}
+.dbi{font-size:15px;}
+.dbl{font-size:7px;font-weight:700;letter-spacing:1px;color:var(--tm);text-transform:uppercase;}
+#db.on .dbl{color:var(--gr);}
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;}
+.ov.open{opacity:1;pointer-events:all;}
+.sh{position:absolute;bottom:0;left:0;right:0;background:var(--s);border-top:1px solid var(--bb);border-radius:24px 24px 0 0;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;}
+.ov.open .sh{transform:translateY(0);}
+.shdl{width:38px;height:4px;background:var(--tm);border-radius:2px;margin:12px auto 16px;}
+.shdr{padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br);}
+.sht{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;}
+.shb{background:var(--s2);border:1px solid var(--bb);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--gr);}
+.shs{padding:13px 20px;border-bottom:1px solid var(--br);}
+.shl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--tm);text-transform:uppercase;margin-bottom:10px;}
+.hg{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;}
+.hc{aspect-ratio:1;border-radius:8px;background:var(--s2);border:1.5px solid var(--br);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--td);cursor:pointer;transition:all .15s;gap:1px;}
+.hc:active{transform:scale(.88);}
+.hc.cur{background:var(--grd);border-color:var(--gr);color:white;}
+.hcp{font-size:7px;font-weight:500;opacity:.7;}
+.sr{display:flex;align-items:center;justify-content:space-between;}
+.slb{font-size:13px;font-weight:500;color:var(--td);}
+.ss{display:flex;align-items:center;gap:13px;}
+.st{width:34px;height:34px;border-radius:50%;background:var(--s2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--td);transition:all .15s;}
+.st:active{transform:scale(.85);}
+.sn{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--tx);min-width:32px;text-align:center;line-height:1;}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.tb{background:var(--s2);border:1.5px solid var(--br);border-radius:var(--rs);padding:9px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .15s;}
+.tb:active{transform:scale(.93);}
+.tb.hit{border-color:var(--gr);background:rgba(29,185,84,.1);}
+.tb.miss{border-color:var(--or);background:rgba(255,107,26,.1);}
+.tic{font-size:16px;}
+.tlb{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--td);text-transform:uppercase;}
+.tb.hit .tlb{color:var(--gr);}
+.tb.miss .tlb{color:var(--or);}
+.fv{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px;}
+.cr{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.cr::-webkit-scrollbar{display:none;}
+.ch{flex-shrink:0;background:var(--s2);border:1.5px solid var(--br);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--td);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ch:active{transform:scale(.93);}
+.ch.on{background:var(--grd);border-color:var(--gr);color:white;font-weight:600;}
+.rows{display:flex;flex-direction:column;gap:9px;}
+.row{background:var(--s2);border:1px solid var(--br);border-radius:var(--rs);padding:11px 12px;display:flex;gap:9px;align-items:flex-start;}
+.rn{width:24px;height:24px;border-radius:50%;background:var(--s3);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gr);flex-shrink:0;margin-top:2px;}
+.rb2{flex:1;display:flex;flex-direction:column;gap:6px;}
+.rl{font-size:10px;color:var(--td);font-weight:600;}
+.lr{display:flex;gap:5px;flex-wrap:wrap;}
+.li{background:var(--s3);border:1px solid var(--br);border-radius:16px;padding:3px 9px;font-size:11px;font-weight:500;color:var(--td);cursor:pointer;transition:all .15s;}
+.li:active{transform:scale(.93);}
+.li.on{border-color:var(--or);color:var(--or);background:rgba(255,107,26,.08);}
+.sv{display:block;margin:13px 20px 0;padding:14px;background:var(--grd);border:none;border-radius:var(--r);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px var(--gg);width:calc(100% - 40px);text-align:center;}
+.sv:active{transform:scale(.97);background:#0f6e2e;}
+#toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-6px);background:var(--s2);border:1px solid var(--gr);border-radius:30px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--gr);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.w{border-color:var(--or);color:var(--or);}
+@keyframes gp{0%{box-shadow:0 0 0 0 var(--gg);}70%{box-shadow:0 0 0 10px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
+.pulse{animation:gp .6s ease;}
 </style>
 </head>
 <body>
 <div id="app">
-
-  <!-- VIEWFINDER -->
-  <div id="viewfinder">
-    <div class="vf-scene"></div>
-    <div class="vf-sky-glow"></div>
-    <div class="vf-ground"></div>
-
-    <!-- Framing guides -->
-    <div id="guides">
-      <div class="guide-thirds-h"></div>
-      <div class="guide-thirds-h"></div>
-      <div class="guide-thirds-v"></div>
-      <div class="guide-thirds-v"></div>
-      <div class="guide-golfer">
-        <div class="g-corner tl"></div>
-        <div class="g-corner tr"></div>
-        <div class="g-corner bl"></div>
-        <div class="g-corner br"></div>
-      </div>
-      <div class="guide-target"></div>
-    </div>
-
-    <!-- Hole indicator -->
-    <div id="hole-indicator">
-      <div class="hole-pill" onclick="openHoleSheet()">
-        <div class="hole-pill-label">Hole</div>
-        <div class="hole-pill-num" id="hole-num">1</div>
-        <div class="hole-pill-meta">
-          <div class="hole-pill-par" id="hole-par-label">Par 3</div>
-          <div class="hole-pill-yds" id="hole-yds-label">155 yds</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Data FAB -->
-    <div id="data-fab" onclick="openDataSheet()">
-      <span class="fab-icon">＋</span>
-      <span class="fab-label">Data</span>
-    </div>
-
-    <!-- Recorded clips indicator -->
-    <div id="clips-indicator"></div>
-
-    <!-- Distance display -->
-    <div id="dist-display">
-      <div class="dist-num" id="dist-num">—</div>
-      <div class="dist-unit-label" id="dist-unit">yds</div>
-    </div>
-
-    <!-- Geo tag buttons -->
-    <div id="geo-overlay">
-      <div class="geo-tag-btn" id="ball-btn" onclick="geoTag('ball')">
-        <div class="geo-tag-icon">⛳</div>
-        <div class="geo-tag-info">
-          <div class="geo-tag-label">Ball</div>
-          <div class="geo-tag-value" id="ball-val">TAP</div>
-        </div>
-      </div>
-      <div class="geo-tag-btn" id="pin-btn" onclick="geoTag('pin')">
-        <div class="geo-tag-icon">🚩</div>
-        <div class="geo-tag-info">
-          <div class="geo-tag-label">Pin</div>
-          <div class="geo-tag-value" id="pin-val">TAP</div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /viewfinder -->
-
-  <!-- CAMERA CONTROLS -->
-  <div id="camera-controls">
-    <div class="ctrl-btn" id="guides-btn" onclick="toggleGuides()">⊞</div>
-    <div id="record-btn" onclick="toggleRecord()">
-      <div class="rec-timer">
-        <div class="rec-dot"></div>
-        <span id="rec-time">00:00</span>
-      </div>
-      <div id="record-inner"></div>
-    </div>
-    <div class="ctrl-btn" onclick="showToast('📸 Photo captured')">⚡</div>
+<div id="banner">
+  <div class="logo">FAIRWAY</div>
+  <div class="mt">
+    <div class="mb as" id="bs" onclick="setMode('social')">📱 Social</div>
+    <div class="mb" id="bb" onclick="setMode('broadcast')">📹 Broadcast</div>
   </div>
-
-  <!-- TOAST -->
-  <div id="toast"></div>
-
-  <!-- HOLE EDIT SHEET -->
-  <div id="hole-sheet-overlay" onclick="handleHoleOverlayClick(event)">
-    <div id="hole-sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header">
-        <div class="sheet-title">Select Hole</div>
-        <div class="sheet-hole-badge" id="hole-sheet-badge">Hole 1</div>
-      </div>
-      <div style="padding: 16px 0 0;">
-        <div class="hole-grid" id="hole-grid"></div>
-        <div style="padding: 16px 0 0; display: flex; gap: 8px; flex-wrap: wrap;">
-          <!-- Par/yds info will render here -->
-          <div id="selected-hole-info" style="font-size:13px; color:var(--text-dim); padding: 8px 0;"></div>
-        </div>
+  <div class="hp" onclick="openH()">
+    <div class="hpn" id="hpn">1</div>
+    <div class="hpm"><div class="hpp" id="hpp">Par 3</div><div class="hpy" id="hpy">155 yds</div></div>
+  </div>
+</div>
+<div id="vf">
+  <div class="vb"></div><div class="vs"></div><div class="vg"></div>
+  <div class="mbadge" id="mbadge">SOCIAL · 9:16</div>
+  <div id="guides">
+    <div class="gl gh1"></div><div class="gl gh2"></div>
+    <div class="gl gv1"></div><div class="gl gv2"></div>
+    <div class="gsub"><div class="gc tl"></div><div class="gc tr"></div><div class="gc bl"></div><div class="gc br"></div></div>
+    <div class="gtgt"></div>
+  </div>
+  <div id="ci"></div>
+  <div id="dp"><div class="dn" id="dn">—</div><div class="du">yds</div></div>
+  <div id="geo">
+    <div class="gb" id="bb2" onclick="gTag('ball')"><div class="gi">⛳</div><div><div class="gl2">Ball</div><div class="gv2" id="bv">TAP</div></div></div>
+    <div class="gb" id="pb" onclick="gTag('pin')"><div class="gi">🚩</div><div><div class="gl2">Pin</div><div class="gv2" id="pv">TAP</div></div></div>
+  </div>
+  <div id="prom">
+    <div class="pc">
+      <div class="pt">Clip Saved</div>
+      <div class="ps">Tag distance for this shot?</div>
+      <div class="pi2"><div class="pd" id="pdur">00:00</div><div class="pmb social" id="pmode">SOCIAL</div></div>
+      <div class="pa">
+        <div class="pb pr" onclick="tagNow()"><span class="pbi">📍</span><div><div class="pbm">Tag Distance Now</div><div class="pbh">GPS from current position</div></div></div>
+        <div class="pb" onclick="skipTag()"><span class="pbi">⏭</span><div><div class="pbm">Skip</div><div class="pbh">Add distance manually in Data</div></div></div>
+        <div class="pb sk" onclick="skipTag()">Dismiss</div>
       </div>
     </div>
   </div>
-
-  <!-- DATA SHEET -->
-  <div id="data-sheet-overlay" onclick="handleDataOverlayClick(event)">
-    <div id="data-sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header">
-        <div class="sheet-title">Hole Data</div>
-        <div class="sheet-hole-badge" id="data-sheet-badge">Hole 1</div>
-      </div>
-
-      <!-- Score -->
-      <div class="sheet-section">
-        <div class="sheet-section-label">Score</div>
-        <div class="score-row">
-          <div class="score-label" id="score-vs-par">Even</div>
-          <div class="score-stepper">
-            <div class="step-btn" onclick="adjustScore(-1)">−</div>
-            <div class="score-val" id="score-val">—</div>
-            <div class="step-btn" onclick="adjustScore(1)">＋</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fairway -->
-      <div class="sheet-section" id="fir-section">
-        <div class="sheet-section-label">Fairway</div>
-        <div class="tri-selector">
-          <div class="tri-btn" onclick="selectFIR(this,'left')">
-            <div class="tri-icon">←</div>
-            <div class="tri-label">Left</div>
-          </div>
-          <div class="tri-btn" onclick="selectFIR(this,'hit')">
-            <div class="tri-icon">✓</div>
-            <div class="tri-label">Hit</div>
-          </div>
-          <div class="tri-btn" onclick="selectFIR(this,'right')">
-            <div class="tri-icon">→</div>
-            <div class="tri-label">Right</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- GIR -->
-      <div class="sheet-section">
-        <div class="sheet-section-label">Green in Regulation</div>
-        <div class="tri-selector">
-          <div class="tri-btn" onclick="selectGIR(this,'miss')">
-            <div class="tri-icon">✗</div>
-            <div class="tri-label">Miss</div>
-          </div>
-          <div class="tri-btn" onclick="selectGIR(this,'hit')">
-            <div class="tri-icon">✓</div>
-            <div class="tri-label">Hit</div>
-          </div>
-          <div class="tri-btn" onclick="selectGIR(this,'close')">
-            <div class="tri-icon">◎</div>
-            <div class="tri-label">Close</div>
-          </div>
-        </div>
-        <!-- Miss direction -->
-        <div class="five-selector" id="gir-miss-dir" style="display:none;">
-          <div class="tri-btn" style="padding:7px 4px;" onclick="selectGIRDir(this,'short')">
-            <div class="tri-icon" style="font-size:14px;">↓</div>
-            <div class="tri-label">Short</div>
-          </div>
-          <div class="tri-btn" style="padding:7px 4px;" onclick="selectGIRDir(this,'left')">
-            <div class="tri-icon" style="font-size:14px;">←</div>
-            <div class="tri-label">Left</div>
-          </div>
-          <div class="tri-btn" style="padding:7px 4px;" onclick="selectGIRDir(this,'long')">
-            <div class="tri-icon" style="font-size:14px;">↑</div>
-            <div class="tri-label">Long</div>
-          </div>
-          <div class="tri-btn" style="padding:7px 4px;" onclick="selectGIRDir(this,'right')">
-            <div class="tri-icon" style="font-size:14px;">→</div>
-            <div class="tri-label">Right</div>
-          </div>
-          <div class="tri-btn" style="padding:7px 4px;" onclick="selectGIRDir(this,'pin')">
-            <div class="tri-icon" style="font-size:14px;">🎯</div>
-            <div class="tri-label">Pin</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Per-shot data -->
-      <div class="sheet-section" id="shot-rows-section">
-        <div class="sheet-section-label">Shots Captured</div>
-        <div class="shot-rows" id="shot-rows-container">
-          <div style="font-size:12px; color:var(--text-muted); text-align:center; padding:8px 0;">
-            No clips captured this hole yet
-          </div>
-        </div>
-      </div>
-
-      <button class="save-btn" onclick="saveHoleData()">Save & Continue</button>
-    </div>
+</div>
+<div id="bbar">📹 BROADCAST MODE · 16:9 · TOP TRACER COMPATIBLE</div>
+<div id="ctrl">
+  <div class="cb on" id="gb" onclick="togG()">⊞</div>
+  <div id="rb" onclick="togR()"><div class="rt"><div class="rdot"></div><span id="rt">00:00</span></div><div id="ri"></div></div>
+  <div id="db" onclick="openD()"><div class="dbi">＋</div><div class="dbl">Data</div></div>
+</div>
+<div id="toast"></div>
+<div class="ov" id="hov" onclick="mayC(event,'hov')">
+  <div class="sh">
+    <div class="shdl"></div>
+    <div class="shdr"><div class="sht">Select Hole</div><div class="shb" id="hbadge">Hole 1</div></div>
+    <div class="shs"><div class="hg" id="hgrid"></div><div id="hdet" style="font-size:12px;color:var(--td);padding-top:10px;"></div></div>
   </div>
-
-</div><!-- /app -->
-
+</div>
+<div class="ov" id="dov" onclick="mayC(event,'dov')">
+  <div class="sh">
+    <div class="shdl"></div>
+    <div class="shdr"><div class="sht">Hole Data</div><div class="shb" id="dbadge">Hole 1</div></div>
+    <div class="shs"><div class="shl">Score</div>
+      <div class="sr"><div class="slb" id="slb">Tap ± to enter</div>
+        <div class="ss"><div class="st" onclick="adj(-1)">−</div><div class="sn" id="sn">—</div><div class="st" onclick="adj(1)">＋</div></div>
+      </div>
+    </div>
+    <div class="shs" id="firsec"><div class="shl">Fairway</div>
+      <div class="tri" id="firtri">
+        <div class="tb" onclick="pk('fir','left',this)"><div class="tic">←</div><div class="tlb">Left</div></div>
+        <div class="tb" onclick="pk('fir','hit',this)"><div class="tic">✓</div><div class="tlb">Hit</div></div>
+        <div class="tb" onclick="pk('fir','right',this)"><div class="tic">→</div><div class="tlb">Right</div></div>
+      </div>
+    </div>
+    <div class="shs"><div class="shl">Green in Regulation</div>
+      <div class="tri" id="girtri">
+        <div class="tb" onclick="pk('gir','miss',this)"><div class="tic">✗</div><div class="tlb">Miss</div></div>
+        <div class="tb" onclick="pk('gir','hit',this)"><div class="tic">✓</div><div class="tlb">Hit</div></div>
+        <div class="tb" onclick="pk('gir','close',this)"><div class="tic">◎</div><div class="tlb">Close</div></div>
+      </div>
+      <div class="fv" id="girdir" style="display:none;">
+        <div class="tb" style="padding:6px 3px" onclick="pk('gd','short',this)"><div class="tic" style="font-size:13px">↓</div><div class="tlb">Short</div></div>
+        <div class="tb" style="padding:6px 3px" onclick="pk('gd','left',this)"><div class="tic" style="font-size:13px">←</div><div class="tlb">Left</div></div>
+        <div class="tb" style="padding:6px 3px" onclick="pk('gd','long',this)"><div class="tic" style="font-size:13px">↑</div><div class="tlb">Long</div></div>
+        <div class="tb" style="padding:6px 3px" onclick="pk('gd','right',this)"><div class="tic" style="font-size:13px">→</div><div class="tlb">Right</div></div>
+        <div class="tb" style="padding:6px 3px" onclick="pk('gd','pin',this)"><div class="tic" style="font-size:13px">🎯</div><div class="tlb">Pin</div></div>
+      </div>
+    </div>
+    <div class="shs"><div class="shl">Captured Clips</div><div class="rows" id="srows"></div></div>
+    <button class="sv" onclick="save()">Save & Next Hole →</button>
+    <div style="height:16px"></div>
+  </div>
+</div>
+</div>
 <script>
-// ── COURSE DATA: Capitol Tees (Silver) ──
-const COURSE = {
-  name: 'Capitol Park Golf Course',
-  tees: 'Silver',
-  holes: [
-    { hole:1, par:3, yards:155, hcp:13 },
-    { hole:2, par:4, yards:402, hcp:9  },
-    { hole:3, par:3, yards:165, hcp:5  },
-    { hole:4, par:4, yards:377, hcp:1  },
-    { hole:5, par:4, yards:400, hcp:3  },
-    { hole:6, par:4, yards:304, hcp:17 },
-    { hole:7, par:3, yards:200, hcp:11 },
-    { hole:8, par:5, yards:546, hcp:15 },
-    { hole:9, par:4, yards:397, hcp:7  },
-  ]
-};
-
-// ── STATE ──
-let currentHole = 1;
-let ballTagged = false;
-let pinTagged = false;
-let ballCoords = null;
-let pinCoords = null;
-let recording = false;
-let recInterval = null;
-let recSeconds = 0;
-let guidesOn = true;
-let toastTimer = null;
-let clips = {}; // clips[hole] = [{id, dist, distUnit, timestamp}]
-let holeData = {}; // holeData[hole] = {score, fir, gir, girDir, shots:[{club,lie}]}
-let scoreVal = null;
-let firVal = null;
-let girVal = null;
-let girDirVal = null;
-
-// ── INIT ──
-function init() {
-  buildHoleGrid();
-  updateHoleDisplay();
-}
-
-// ── HOLE DISPLAY ──
-function updateHoleDisplay() {
-  const h = COURSE.holes[currentHole - 1];
-  document.getElementById('hole-num').textContent = currentHole;
-  document.getElementById('hole-par-label').textContent = 'Par ' + h.par;
-  document.getElementById('hole-yds-label').textContent = h.yards + ' yds';
-  document.getElementById('data-sheet-badge').textContent = 'Hole ' + currentHole;
-  document.getElementById('hole-sheet-badge').textContent = 'Hole ' + currentHole;
-  updateClipsIndicator();
-  updateDataFab();
-}
-
-// ── HOLE GRID ──
-function buildHoleGrid() {
-  const grid = document.getElementById('hole-grid');
-  grid.innerHTML = '';
-  COURSE.holes.forEach(h => {
-    const cell = document.createElement('div');
-    cell.className = 'hole-cell' + (h.hole === currentHole ? ' current' : '');
-    cell.innerHTML = `<div class="hole-cell-info"><span>${h.hole}</span><span class="hole-cell-par">P${h.par}</span></div>`;
-    cell.onclick = () => selectHole(h.hole);
-    grid.appendChild(cell);
-  });
-}
-
-function selectHole(num) {
-  currentHole = num;
-  buildHoleGrid();
-  updateHoleDisplay();
-  resetGeoTags();
-  const h = COURSE.holes[num - 1];
-  document.getElementById('selected-hole-info').textContent =
-    `Hole ${num} · Par ${h.par} · ${h.yards} yds · Hcp ${h.hcp}`;
-  showToast('Hole ' + num);
-  setTimeout(closeHoleSheet, 600);
-}
-
-// ── HOLE SHEET ──
-function openHoleSheet() {
-  buildHoleGrid();
-  const h = COURSE.holes[currentHole - 1];
-  document.getElementById('selected-hole-info').textContent =
-    `Hole ${currentHole} · Par ${h.par} · ${h.yards} yds · Hcp ${h.hcp}`;
-  document.getElementById('hole-sheet-overlay').classList.add('open');
-}
-
-function closeHoleSheet() {
-  document.getElementById('hole-sheet-overlay').classList.remove('open');
-}
-
-function handleHoleOverlayClick(e) {
-  if (e.target === document.getElementById('hole-sheet-overlay')) closeHoleSheet();
-}
-
-// ── DATA SHEET ──
-function openDataSheet() {
-  const d = holeData[currentHole] || {};
-  // Reset UI
-  scoreVal = d.score || null;
-  firVal = d.fir || null;
-  girVal = d.gir || null;
-  girDirVal = d.girDir || null;
-
-  // Score display
-  updateScoreDisplay();
-
-  // FIR - hide on par 3s
-  const h = COURSE.holes[currentHole - 1];
-  document.getElementById('fir-section').style.display = h.par === 3 ? 'none' : '';
-
-  // Reset selections
-  document.querySelectorAll('.tri-btn').forEach(b => b.className = 'tri-btn');
-  document.getElementById('gir-miss-dir').style.display = 'none';
-
-  // Restore saved selections
-  if (firVal) {
-    const firBtns = document.querySelectorAll('#fir-section .tri-btn');
-    firBtns.forEach(b => {
-      if (b.querySelector('.tri-label').textContent.toLowerCase() === firVal) {
-        b.classList.add(firVal === 'hit' ? 'selected' : 'selected-miss');
-      }
-    });
-  }
-
-  // Build shot rows for captured clips
-  buildShotRows();
-
-  document.getElementById('data-sheet-overlay').classList.add('open');
-}
-
-function closeDataSheet() {
-  document.getElementById('data-sheet-overlay').classList.remove('open');
-}
-
-function handleDataOverlayClick(e) {
-  if (e.target === document.getElementById('data-sheet-overlay')) closeDataSheet();
-}
-
-// ── SCORE ──
-function adjustScore(dir) {
-  const h = COURSE.holes[currentHole - 1];
-  if (scoreVal === null) scoreVal = h.par;
-  scoreVal = Math.max(1, Math.min(12, scoreVal + dir));
-  updateScoreDisplay();
-}
-
-function updateScoreDisplay() {
-  const h = COURSE.holes[currentHole - 1];
-  const el = document.getElementById('score-val');
-  const label = document.getElementById('score-vs-par');
-
-  if (scoreVal === null) {
-    el.textContent = '—';
-    label.textContent = 'Tap ± to enter';
-    label.style.color = 'var(--text-muted)';
-    return;
-  }
-
-  el.textContent = scoreVal;
-  const diff = scoreVal - h.par;
-  if (diff < -1) { label.textContent = 'Eagle 🦅'; label.style.color = '#ffd700'; }
-  else if (diff === -1) { label.textContent = 'Birdie 🐦'; label.style.color = 'var(--green)'; }
-  else if (diff === 0) { label.textContent = 'Par'; label.style.color = 'var(--text-dim)'; }
-  else if (diff === 1) { label.textContent = 'Bogey'; label.style.color = 'var(--orange)'; }
-  else if (diff === 2) { label.textContent = 'Double Bogey'; label.style.color = 'var(--red)'; }
-  else { label.textContent = '+' + diff; label.style.color = 'var(--red)'; }
-}
-
-// ── FIR ──
-function selectFIR(el, val) {
-  firVal = val;
-  document.querySelectorAll('#fir-section .tri-btn').forEach(b => b.className = 'tri-btn');
-  el.classList.add(val === 'hit' ? 'selected' : 'selected-miss');
-}
-
-// ── GIR ──
-function selectGIR(el, val) {
-  girVal = val;
-  document.querySelectorAll('#data-sheet .sheet-section:nth-child(4) > .tri-selector .tri-btn')
-    .forEach(b => b.className = 'tri-btn');
-  el.classList.add(val === 'hit' ? 'selected' : 'selected-miss');
-  document.getElementById('gir-miss-dir').style.display = val === 'miss' ? 'grid' : 'none';
-}
-
-function selectGIRDir(el, val) {
-  girDirVal = val;
-  document.querySelectorAll('#gir-miss-dir .tri-btn').forEach(b => b.className = 'tri-btn');
-  el.classList.add('selected-miss');
-}
-
-// ── SHOT ROWS ──
-function buildShotRows() {
-  const container = document.getElementById('shot-rows-container');
-  const holeClips = clips[currentHole] || [];
-  const saved = (holeData[currentHole] || {}).shots || [];
-
-  if (holeClips.length === 0) {
-    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center; padding:8px 0;">No clips captured this hole yet</div>';
-    return;
-  }
-
-  container.innerHTML = holeClips.map((clip, i) => {
-    const s = saved[i] || {};
-    const clubs = ['Driver','3 Wood','5 Wood','4 Iron','5 Iron','6 Iron','7 Iron','8 Iron','9 Iron','PW','GW','SW','LW','Putter'];
-    const lies = ['Tee','Fairway','Rough','Bunker','Green','Penalty'];
-    return `
-      <div class="shot-row">
-        <div class="shot-row-num">${i+1}</div>
-        <div class="shot-row-fields">
-          <div class="shot-row-label">Club — <span style="color:var(--orange)">${clip.dist !== '—' ? clip.dist + ' ' + clip.distUnit : 'no distance'}</span></div>
-          <div class="chip-scroll" id="club-row-${i}">
-            ${clubs.map(c => `<div class="chip ${s.club===c?'selected':''}" onclick="selectRowClub(${i},'${c}')">${c}</div>`).join('')}
-          </div>
-          <div class="shot-row-label" style="margin-top:4px;">Lie</div>
-          <div class="lie-selector" id="lie-row-${i}">
-            ${lies.map(l => `<div class="lie-chip ${s.lie===l?'selected':''}" onclick="selectRowLie(${i},'${l}')">${l}</div>`).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function selectRowClub(idx, club) {
-  if (!holeData[currentHole]) holeData[currentHole] = {};
-  if (!holeData[currentHole].shots) holeData[currentHole].shots = [];
-  if (!holeData[currentHole].shots[idx]) holeData[currentHole].shots[idx] = {};
-  holeData[currentHole].shots[idx].club = club;
-  document.querySelectorAll(`#club-row-${idx} .chip`).forEach(c => {
-    c.classList.toggle('selected', c.textContent === club);
-  });
-}
-
-function selectRowLie(idx, lie) {
-  if (!holeData[currentHole]) holeData[currentHole] = {};
-  if (!holeData[currentHole].shots) holeData[currentHole].shots = [];
-  if (!holeData[currentHole].shots[idx]) holeData[currentHole].shots[idx] = {};
-  holeData[currentHole].shots[idx].lie = lie;
-  document.querySelectorAll(`#lie-row-${idx} .lie-chip`).forEach(c => {
-    c.classList.toggle('selected', c.textContent === lie);
-  });
-}
-
-// ── SAVE HOLE DATA ──
-function saveHoleData() {
-  if (!holeData[currentHole]) holeData[currentHole] = {};
-  holeData[currentHole].score = scoreVal;
-  holeData[currentHole].fir = firVal;
-  holeData[currentHole].gir = girVal;
-  holeData[currentHole].girDir = girDirVal;
-  updateDataFab();
-  closeDataSheet();
-  showToast('✅ Hole ' + currentHole + ' saved');
-
-  // Auto-advance to next hole
-  if (currentHole < 9) {
-    setTimeout(() => {
-      currentHole++;
-      updateHoleDisplay();
-      resetGeoTags();
-      showToast('→ Hole ' + currentHole);
-    }, 1200);
-  }
-}
-
-function updateDataFab() {
-  const fab = document.getElementById('data-fab');
-  const hasData = holeData[currentHole] && (
-    holeData[currentHole].score !== null ||
-    holeData[currentHole].fir ||
-    holeData[currentHole].gir
-  );
-  fab.classList.toggle('has-data', !!hasData);
-}
-
-// ── GEO TAG ──
-function geoTag(type) {
-  const btn = document.getElementById(type === 'ball' ? 'ball-btn' : 'pin-btn');
-  btn.classList.add('pulse-once');
-  setTimeout(() => btn.classList.remove('pulse-once'), 700);
-
-  const lat = (38.5836 + (Math.random()-0.5)*0.002).toFixed(5);
-  const lng = (-121.3766 + (Math.random()-0.5)*0.002).toFixed(5);
-
-  if (type === 'ball') {
-    ballTagged = true;
-    ballCoords = {lat, lng};
-    btn.classList.add('tagged');
-    document.getElementById('ball-val').textContent = lat.slice(-5);
-    showToast('📍 Ball tagged');
-  } else {
-    pinTagged = true;
-    pinCoords = {lat, lng};
-    btn.classList.add('tagged');
-    document.getElementById('pin-val').textContent = lat.slice(-5);
-    showToast('🚩 Pin tagged');
-  }
-
-  if (ballTagged && pinTagged) {
-    const dist = Math.floor(80 + Math.random() * 220);
-    const unit = 'yds';
-    document.getElementById('dist-num').textContent = dist;
-    document.getElementById('dist-unit').textContent = unit;
-    document.getElementById('dist-display').classList.add('visible');
-  }
-}
-
-function resetGeoTags() {
-  ballTagged = false;
-  pinTagged = false;
-  ballCoords = null;
-  pinCoords = null;
-  document.getElementById('ball-btn').classList.remove('tagged');
-  document.getElementById('pin-btn').classList.remove('tagged');
-  document.getElementById('ball-val').textContent = 'TAP';
-  document.getElementById('pin-val').textContent = 'TAP';
-  document.getElementById('dist-display').classList.remove('visible');
-}
-
-// ── RECORD ──
-function toggleRecord() {
-  const btn = document.getElementById('record-btn');
-  recording = !recording;
-
-  if (recording) {
-    btn.classList.add('recording');
-    recSeconds = 0;
-    recInterval = setInterval(() => {
-      recSeconds++;
-      const m = String(Math.floor(recSeconds/60)).padStart(2,'0');
-      const s = String(recSeconds%60).padStart(2,'0');
-      document.getElementById('rec-time').textContent = m+':'+s;
-    }, 1000);
-    showToast('🔴 Recording');
-  } else {
-    btn.classList.remove('recording');
-    clearInterval(recInterval);
-
-    // Save clip
-    const dist = ballTagged && pinTagged
-      ? document.getElementById('dist-num').textContent
-      : '—';
-    const distUnit = document.getElementById('dist-unit').textContent;
-
-    if (!clips[currentHole]) clips[currentHole] = [];
-    clips[currentHole].push({
-      id: Date.now(),
-      dist,
-      distUnit,
-      duration: document.getElementById('rec-time').textContent,
-      timestamp: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
-    });
-
-    updateClipsIndicator();
-    showToast('✅ Clip saved · ' + document.getElementById('rec-time').textContent);
-    resetGeoTags();
-  }
-}
-
-// ── CLIPS INDICATOR ──
-function updateClipsIndicator() {
-  const indicator = document.getElementById('clips-indicator');
-  const holeClips = clips[currentHole] || [];
-  indicator.innerHTML = holeClips.map(() => '<div class="clip-dot"></div>').join('');
-}
-
-// ── GUIDES ──
-function toggleGuides() {
-  guidesOn = !guidesOn;
-  document.getElementById('guides').style.opacity = guidesOn ? '1' : '0';
-  const btn = document.getElementById('guides-btn');
-  btn.classList.toggle('active-btn', guidesOn);
-  showToast(guidesOn ? '⊞ Guides on' : '⊟ Guides off');
-}
-
-// ── TOAST ──
-function showToast(msg, warn) {
-  const t = document.getElementById('toast');
-  if (toastTimer) clearTimeout(toastTimer);
-  t.textContent = msg;
-  t.className = 'show' + (warn ? ' warn' : '');
-  toastTimer = setTimeout(() => t.className = '', 2200);
-}
-
+const C=[{h:1,p:3,y:155,hcp:13},{h:2,p:4,y:402,hcp:9},{h:3,p:3,y:165,hcp:5},{h:4,p:4,y:377,hcp:1},{h:5,p:4,y:400,hcp:3},{h:6,p:4,y:304,hcp:17},{h:7,p:3,y:200,hcp:11},{h:8,p:5,y:546,hcp:15},{h:9,p:4,y:397,hcp:7}];
+let hole=1,mode='social',rec=false,rS=0,rI=null,gOn=true,bOn=false,pOn=false,tT=null;
+let clips={},hD={},tSc=null,tFir=null,tGir=null,tGd=null;
+function init(){buildG();upH();}
+function setMode(m){mode=m;document.getElementById('app').classList.toggle('bc',m==='broadcast');document.getElementById('bs').className='mb'+(m==='social'?' as':'');document.getElementById('bb').className='mb'+(m==='broadcast'?' ab':'');document.getElementById('mbadge').textContent=m==='social'?'SOCIAL · 9:16':'BROADCAST · 16:9';toast(m==='social'?'📱 Social — 9:16 vertical':'📹 Broadcast — 16:9 Top Tracer compatible');}
+function upH(){const h=C[hole-1];document.getElementById('hpn').textContent=hole;document.getElementById('hpp').textContent='Par '+h.p;document.getElementById('hpy').textContent=h.y+' yds';document.getElementById('dbadge').textContent='Hole '+hole;document.getElementById('hbadge').textContent='Hole '+hole;upCI();upDB();}
+function buildG(){const g=document.getElementById('hgrid');g.innerHTML='';C.forEach(h=>{const c=document.createElement('div');c.className='hc'+(h.h===hole?' cur':'');c.innerHTML=h.h+'<div class="hcp">P'+h.p+'</div>';c.onclick=()=>pickH(h.h);g.appendChild(c);});}
+function pickH(n){hole=n;buildG();upH();resetGeo();const h=C[n-1];document.getElementById('hdet').textContent=`Hole ${n} · Par ${h.p} · ${h.y} yds · Hcp ${h.hcp}`;toast('Hole '+n);setTimeout(()=>cls('hov'),600);}
+function openH(){buildG();const h=C[hole-1];document.getElementById('hdet').textContent=`Hole ${hole} · Par ${h.p} · ${h.y} yds · Hcp ${h.hcp}`;opn('hov');}
+function gTag(t){const btn=document.getElementById(t==='ball'?'bb2':'pb');btn.classList.add('pulse');setTimeout(()=>btn.classList.remove('pulse'),700);const lat=(38.5836+(Math.random()-.5)*.002).toFixed(5);if(t==='ball'){bOn=true;btn.classList.add('tg');document.getElementById('bv').textContent=lat.slice(-5);toast('📍 Ball tagged');}else{pOn=true;btn.classList.add('tg');document.getElementById('pv').textContent=lat.slice(-5);toast('🚩 Pin tagged');}if(bOn&&pOn){const d=Math.floor(80+Math.random()*220);document.getElementById('dn').textContent=d;document.getElementById('dp').classList.add('show');}}
+function resetGeo(){bOn=false;pOn=false;['bb2','pb'].forEach(id=>{const b=document.getElementById(id);b.classList.remove('tg','pulse');});document.getElementById('bv').textContent='TAP';document.getElementById('pv').textContent='TAP';document.getElementById('dp').classList.remove('show');}
+function togR(){const btn=document.getElementById('rb');rec=!rec;if(rec){btn.classList.add('rec');rS=0;rI=setInterval(()=>{rS++;const m=String(Math.floor(rS/60)).padStart(2,'0'),s=String(rS%60).padStart(2,'0');document.getElementById('rt').textContent=m+':'+s;},1000);toast('🔴 Recording');}else{btn.classList.remove('rec');clearInterval(rI);const dur=document.getElementById('rt').textContent;if(!clips[hole])clips[hole]=[];const dist=bOn&&pOn?document.getElementById('dn').textContent:null;clips[hole].push({dur,dist,ts:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});upCI();document.getElementById('pdur').textContent=dur;const pb=document.getElementById('pmode');pb.textContent=mode.toUpperCase();pb.className='pmb '+mode;document.getElementById('prom').classList.add('show');}}
+function tagNow(){document.getElementById('prom').classList.remove('show');resetGeo();toast('📍 Tap Ball to tag position');}
+function skipTag(){document.getElementById('prom').classList.remove('show');resetGeo();}
+function upCI(){const el=document.getElementById('ci');el.innerHTML=(clips[hole]||[]).map(()=>'<div class="cd"></div>').join('');}
+function openD(){const d=hD[hole]||{};tSc=d.score||null;tFir=d.fir||null;tGir=d.gir||null;tGd=d.gd||null;upSc();document.getElementById('firsec').style.display=C[hole-1].p===3?'none':'';document.querySelectorAll('.tb').forEach(b=>b.className='tb');document.getElementById('girdir').style.display='none';buildRows();opn('dov');}
+function buildRows(){const c=document.getElementById('srows');const hc=clips[hole]||[];const sv=(hD[hole]||{}).shots||[];const clubs=['Driver','3 Wood','5 Wood','4 Iron','5 Iron','6 Iron','7 Iron','8 Iron','9 Iron','PW','GW','SW','LW','Putter'];const lies=['Tee','Fairway','Rough','Bunker','Green','Penalty'];if(!hc.length){c.innerHTML='<div style="font-size:12px;color:var(--tm);text-align:center;padding:8px 0">No clips this hole</div>';return;}c.innerHTML=hc.map((cl,i)=>{const s=sv[i]||{};return`<div class="row"><div class="rn">${i+1}</div><div class="rb2"><div class="rl">Club ${cl.dist?'· <span style="color:var(--or)">'+cl.dist+' yds</span>':'· no distance'}</div><div class="cr" id="cr${i}">${clubs.map(cc=>`<div class="ch ${s.club===cc?'on':''}" onclick="pC(${i},'${cc}')">${cc}</div>`).join('')}</div><div class="rl" style="margin-top:3px">Lie</div><div class="lr" id="lr${i}">${lies.map(l=>`<div class="li ${s.lie===l?'on':''}" onclick="pL(${i},'${l}')">${l}</div>`).join('')}</div></div></div>`;}).join('');}
+function pC(i,v){if(!hD[hole])hD[hole]={};if(!hD[hole].shots)hD[hole].shots=[];if(!hD[hole].shots[i])hD[hole].shots[i]={};hD[hole].shots[i].club=v;document.querySelectorAll('#cr'+i+' .ch').forEach(c=>c.classList.toggle('on',c.textContent===v));}
+function pL(i,v){if(!hD[hole])hD[hole]={};if(!hD[hole].shots)hD[hole].shots=[];if(!hD[hole].shots[i])hD[hole].shots[i]={};hD[hole].shots[i].lie=v;document.querySelectorAll('#lr'+i+' .li').forEach(c=>c.classList.toggle('on',c.textContent===v));}
+function adj(d){const h=C[hole-1];if(tSc===null)tSc=h.p;tSc=Math.max(1,Math.min(12,tSc+d));upSc();}
+function upSc(){const h=C[hole-1];const el=document.getElementById('sn');const lb=document.getElementById('slb');if(tSc===null){el.textContent='—';lb.textContent='Tap ± to enter';lb.style.color='var(--tm)';return;}el.textContent=tSc;const diff=tSc-h.p;if(diff<=-2){lb.textContent='Eagle 🦅';lb.style.color='#ffd700';}else if(diff===-1){lb.textContent='Birdie 🐦';lb.style.color='var(--gr)';}else if(diff===0){lb.textContent='Par';lb.style.color='var(--td)';}else if(diff===1){lb.textContent='Bogey';lb.style.color='var(--or)';}else if(diff===2){lb.textContent='Double';lb.style.color='var(--rd)';}else{lb.textContent='+'+diff;lb.style.color='var(--rd)';}}
+function pk(type,val,el){if(type==='fir'){tFir=val;document.querySelectorAll('#firtri .tb').forEach(b=>b.className='tb');el.classList.add(val==='hit'?'hit':'miss');}if(type==='gir'){tGir=val;document.querySelectorAll('#girtri .tb').forEach(b=>b.className='tb');el.classList.add(val==='hit'?'hit':'miss');document.getElementById('girdir').style.display=val==='miss'?'grid':'none';}if(type==='gd'){tGd=val;document.querySelectorAll('#girdir .tb').forEach(b=>b.className='tb');el.classList.add('miss');}}
+function save(){if(!hD[hole])hD[hole]={};hD[hole].score=tSc;hD[hole].fir=tFir;hD[hole].gir=tGir;hD[hole].gd=tGd;upDB();cls('dov');toast('✅ Hole '+hole+' saved');if(hole<9){setTimeout(()=>{hole++;upH();resetGeo();toast('→ Hole '+hole);},1200);}}
+function upDB(){const d=hD[hole];const has=d&&(d.score!==null||d.fir||d.gir);document.getElementById('db').classList.toggle('on',!!has);}
+function togG(){gOn=!gOn;document.getElementById('guides').style.opacity=gOn?'1':'0';document.getElementById('gb').classList.toggle('on',gOn);toast(gOn?'⊞ Guides on':'⊟ Guides off');}
+function opn(id){document.getElementById(id).classList.add('open');}
+function cls(id){document.getElementById(id).classList.remove('open');}
+function mayC(e,id){if(e.target===document.getElementById(id))cls(id);}
+function toast(msg,w){const t=document.getElementById('toast');if(tT)clearTimeout(tT);t.textContent=msg;t.className='show'+(w?' w':'');tT=setTimeout(()=>t.className='',2200);}
 init();
 </script>
 </body>
