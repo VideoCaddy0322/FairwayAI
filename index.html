@@ -16,7 +16,7 @@
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;overflow:hidden;user-select:none;}
 #app{width:100%;height:100%;max-width:430px;margin:0 auto;position:relative;display:flex;flex-direction:column;background:var(--bg);transition:max-width .4s;}
 #app.bc{max-width:100%;}
- 
+
 /* BANNER */
 #banner{background:var(--s);border-bottom:1px solid var(--br);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;z-index:20;flex-shrink:0;gap:10px;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gr);}
@@ -30,7 +30,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .hpm{display:flex;flex-direction:column;}
 .hpp{font-size:9px;font-weight:700;color:var(--gr);}
 .hpy{font-size:9px;color:var(--td);}
- 
+
 /* VIEWFINDER */
 #vf{position:relative;overflow:hidden;background:#050a07;}
 #app:not(.bc) #vf{flex:1;}
@@ -38,17 +38,17 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .vb{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 55%,rgba(18,52,26,.9) 0%,transparent 55%),radial-gradient(ellipse at 75% 35%,rgba(12,36,18,.7) 0%,transparent 50%),linear-gradient(180deg,#0a1a0e 0%,#06100a 55%,#030806 100%);}
 .vgr{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(180deg,#172b1c 0%,#0e1f12 100%);border-top:1px solid rgba(30,80,40,.2);}
 .vsk{position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(135,190,155,.07) 0%,transparent 100%);}
- 
+
 .mbadge{position:absolute;top:10px;right:10px;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:2px;z-index:5;}
 #app:not(.bc) .mbadge{color:var(--bl);border:1px solid rgba(58,134,255,.4);background:rgba(8,12,10,.75);}
 #app.bc .mbadge{color:var(--or);border:1px solid rgba(255,107,26,.4);background:rgba(8,12,10,.75);}
- 
+
 /* GUIDES */
 #guides{position:absolute;inset:0;pointer-events:none;transition:opacity .3s;}
 .gl{position:absolute;background:rgba(29,185,84,.15);}
 .gh1{left:0;right:0;height:1px;top:33.3%;}.gh2{left:0;right:0;height:1px;top:66.6%;}
 .gv1{top:0;bottom:0;width:1px;left:33.3%;}.gv2{top:0;bottom:0;width:1px;left:66.6%;}
- 
+
 /* Subject box — left vertical third-line bisects center of box
    Box width ~22% in social, ~18% in broadcast
    Center of box = 33.3%, so left edge = 33.3% - half-width */
@@ -63,12 +63,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 #app:not(.bc) .gtgt{left:28%;top:20%;bottom:0;}
 #app.bc .gtgt{left:30%;top:10%;bottom:0;}
 .gtgt::before{content:'▼ PIN';position:absolute;top:-16px;left:4px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--or);white-space:nowrap;}
- 
+
 /* CLIPS INDICATOR */
 #ci{position:absolute;top:10px;left:10px;display:flex;gap:4px;z-index:10;}
 .cd{width:7px;height:7px;border-radius:50%;background:var(--rd);box-shadow:0 0 5px rgba(230,57,70,.6);animation:pi .3s ease;}
 @keyframes pi{from{opacity:0;transform:scale(0);}to{opacity:1;transform:scale(1);}}
- 
+
 /* DISTANCE PILL */
 #dp{position:absolute;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(8,12,10,.9);backdrop-filter:blur(12px);border:1px solid var(--or);border-radius:30px;padding:5px 16px;display:flex;align-items:baseline;gap:4px;opacity:0;transition:opacity .4s,transform .4s;z-index:10;pointer-events:none;white-space:nowrap;}
 #app:not(.bc) #dp{bottom:85px;}
@@ -76,7 +76,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 #dp.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .dn{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--or);line-height:1;}
 .du{font-size:11px;font-weight:600;color:var(--td);}
- 
+
 /* GEO ROW */
 #geo{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;z-index:10;}
 .gb2{flex:1;background:rgba(8,12,10,.82);backdrop-filter:blur(12px);border:1.5px solid var(--br);border-radius:var(--rs);padding:9px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .25s;}
@@ -87,9 +87,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .gb2.tg .gl3{color:var(--gr);}
 .gv3{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--tm);line-height:1.1;transition:color .3s;}
 .gb2.tg .gv3{color:var(--or);}
- 
+
 /* ── PROMPTS ── */
-.prom-overlay{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:40;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.prom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
 .prom-overlay.show{opacity:1;pointer-events:all;}
 .pc{background:var(--s);border:1px solid var(--bb);border-radius:20px;padding:22px 18px;width:88%;max-width:320px;display:flex;flex-direction:column;gap:12px;animation:su .3s ease;}
 @keyframes su{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
@@ -112,18 +112,18 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .pbh{font-size:10px;color:var(--td);font-weight:400;margin-top:1px;}
 .pb2.warn .pbh{color:rgba(230,57,70,.7);}
 .warn-tag{display:inline-block;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.3);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--rd);margin-top:4px;}
- 
+
 /* Confirmed state */
 .confirm-banner{background:rgba(29,185,84,.1);border:1px solid var(--gr);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;}
 .confirm-icon{font-size:22px;}
 .confirm-text{flex:1;}
 .confirm-title{font-size:12px;font-weight:700;color:var(--gr);}
 .confirm-sub{font-size:10px;color:var(--td);margin-top:1px;}
- 
+
 /* BROADCAST BAR */
 #bbar{display:none;background:rgba(255,107,26,.07);border-top:1px solid rgba(255,107,26,.2);padding:5px 14px;font-size:9px;color:var(--or);font-weight:700;letter-spacing:.5px;text-align:center;flex-shrink:0;}
 #app.bc #bbar{display:block;}
- 
+
 /* CONTROLS */
 #ctrl{background:rgba(8,12,10,.97);border-top:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;z-index:20;flex-shrink:0;}
 #app:not(.bc) #ctrl{padding:14px 24px 28px;}
@@ -145,7 +145,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .dbi{font-size:15px;}
 .dbl2{font-size:7px;font-weight:700;letter-spacing:1px;color:var(--tm);text-transform:uppercase;}
 #db.on .dbl2{color:var(--gr);}
- 
+
 /* SHEETS */
 .ov{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;}
 .ov.open{opacity:1;pointer-events:all;}
@@ -192,7 +192,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .li.on{border-color:var(--or);color:var(--or);background:rgba(255,107,26,.08);}
 .sv{display:block;margin:13px 20px 0;padding:14px;background:var(--grd);border:none;border-radius:var(--r);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px var(--gg);width:calc(100% - 40px);text-align:center;}
 .sv:active{transform:scale(.97);background:#0f6e2e;}
- 
+
 /* TOAST */
 /* CONTEXT SCREEN */
 .ctx-section{padding:10px 0;border-bottom:1px solid var(--br);}
@@ -210,7 +210,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .ctx-shot-btn{flex:1;padding:10px 4px;border-radius:10px;background:var(--s2);border:1.5px solid var(--br);font-size:12px;font-weight:700;color:var(--td);cursor:pointer;text-align:center;transition:all .15s;}
 .ctx-shot-btn:active{transform:scale(.93);}
 .ctx-shot-btn.on{background:var(--grd);border-color:var(--gr);color:white;}
- 
+
 /* REVIEW CARDS */
 .review-hole-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--tm);text-transform:uppercase;padding:4px 0 8px;}
 .review-card{background:var(--s2);border:1px solid var(--br);border-radius:var(--rs);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;}
@@ -225,7 +225,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .review-card-dist-unit{font-size:9px;color:var(--td);text-align:right;font-weight:600;}
 .review-card-chevron{font-size:16px;color:var(--tm);}
 .review-empty{font-size:13px;color:var(--tm);text-align:center;padding:24px 0;}
- 
+
 #toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-6px);background:var(--s2);border:1px solid var(--gr);border-radius:30px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--gr);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #toast.w{border-color:var(--or);color:var(--or);}
@@ -235,7 +235,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 </head>
 <body>
 <div id="app">
- 
+
 <!-- BANNER -->
 <div id="banner">
   <div class="logo">FAIRWAY</div>
@@ -248,7 +248,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     <div class="hpm"><div class="hpp" id="hpp">Par 3</div><div class="hpy" id="hpy">155 yds</div></div>
   </div>
 </div>
- 
+
 <!-- VIEWFINDER -->
 <div id="vf">
 <!-- REAL CAMERA STREAM -->
@@ -260,7 +260,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
   <div class="vsk" id="vf-fallback2"></div>
   <div class="vgr" id="vf-fallback3"></div>
   <div class="mbadge" id="mbadge">SOCIAL · 9:16</div>
- 
+
   <div id="guides">
     <div class="gl gh1"></div><div class="gl gh2"></div>
     <div class="gl gv1"></div><div class="gl gv2"></div>
@@ -270,11 +270,11 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     </div>
     <div class="gtgt"></div>
   </div>
- 
+
   <div id="ci"></div>
- 
+
   <div id="dp"><div class="dn" id="dn">—</div><div class="du">yds</div></div>
- 
+
   <!-- PROMPT 1: Tag starting position -->
   <div class="prom-overlay" id="prom1">
     <div class="pc">
@@ -302,7 +302,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
       </div>
     </div>
   </div>
- 
+
   <!-- PROMPT 2: Add distance -->
   <div class="prom-overlay" id="prom2">
     <div class="pc">
@@ -314,10 +314,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
           <div class="confirm-sub" id="start-coords">GPS confirmed</div>
         </div>
       </div>
- 
+
       <div class="pt">Add Shot Distance?</div>
       <div class="ps">How far did the ball travel?</div>
- 
+
       <div class="pa">
         <div class="pb2 pr" onclick="geoDistance()">
           <span class="pbi2">🚩</span>
@@ -337,7 +337,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
       </div>
     </div>
   </div>
- 
+
   <!-- MANUAL DISTANCE INPUT -->
   <div class="prom-overlay" id="prom3">
     <div class="pc">
@@ -356,19 +356,19 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
       </div>
     </div>
   </div>
- 
+
   <!-- PROMPT 4: Shot Context -->
   <div class="prom-overlay" id="prom4">
     <div class="pc" style="max-height:88vh;overflow-y:auto;">
       <div class="pt">Tag This Shot</div>
       <div class="ps">Add context for the viewer</div>
- 
+
       <!-- Hole -->
       <div class="ctx-section">
         <div class="ctx-lbl">Hole</div>
         <div class="ctx-hole-row" id="ctx-hole-row"></div>
       </div>
- 
+
       <!-- Golfer -->
       <div class="ctx-section">
         <div class="ctx-lbl">Golfer</div>
@@ -380,13 +380,13 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
           style="display:none;margin-top:8px;background:var(--s2);border:1px solid var(--bb);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:14px;width:100%;outline:none;"
           onblur="saveGolfer()" onkeydown="if(event.key==='Enter')saveGolfer()"/>
       </div>
- 
+
       <!-- Club -->
       <div class="ctx-section">
         <div class="ctx-lbl">Club</div>
         <div class="chip-row2" id="ctx-club-row"></div>
       </div>
- 
+
       <!-- Shot Number -->
       <div class="ctx-section">
         <div class="ctx-lbl">Shot Number</div>
@@ -398,7 +398,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
           <div class="ctx-shot-btn" onclick="pickShot(this,5)">5th+</div>
         </div>
       </div>
- 
+
       <div class="pa" style="margin-top:4px;">
         <div class="pb2 pr" onclick="saveContext()">
           <span class="pbi2">✓</span>
@@ -408,11 +408,23 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
       </div>
     </div>
   </div>
- 
+
 </div><!-- /vf -->
- 
+
 <div id="bbar">📹 BROADCAST MODE · 16:9 · TOP TRACER COMPATIBLE</div>
- 
+
+<!-- ROTATE PROMPT -->
+<div id="rotate-prompt" style="display:none;position:fixed;inset:0;background:rgba(8,12,10,0.95);z-index:300;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:52px;animation:spin 2s ease-in-out infinite;">📱</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--tx);">Rotate Your Phone</div>
+  <div style="font-size:13px;color:var(--td);text-align:center;max-width:240px;line-height:1.5;">Broadcast mode requires landscape orientation for 16:9 Top Tracer compatible footage</div>
+  <div style="font-size:11px;font-weight:700;color:var(--or);letter-spacing:1px;margin-top:8px;">OR</div>
+  <div onclick="setMode('social')" style="background:var(--s2);border:1px solid var(--br);border-radius:30px;padding:10px 20px;font-size:13px;font-weight:600;color:var(--td);cursor:pointer;">Switch to Social Mode</div>
+</div>
+<style>
+@keyframes spin{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+</style>
+
 <!-- CONTROLS -->
 <div id="ctrl">
   <div class="cb2 on" id="gb" onclick="togG()">⊞</div>
@@ -425,9 +437,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     <div class="dbl2">Review</div>
   </div>
 </div>
- 
+
 <div id="toast"></div>
- 
+
 <!-- HOLE SHEET -->
 <div class="ov" id="hov" onclick="mayC(event,'hov')">
   <div class="sh">
@@ -439,7 +451,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     </div>
   </div>
 </div>
- 
+
 <!-- REVIEW SHEET -->
 <div class="ov" id="dov" onclick="mayC(event,'dov')">
   <div class="sh">
@@ -451,7 +463,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     <div id="review-list" style="padding:12px 20px 20px;display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </div>
- 
+
 <!-- SHOT DETAIL SHEET -->
 <div class="ov" id="shot-detail-ov" onclick="mayC(event,'shot-detail-ov')">
   <div class="sh">
@@ -493,16 +505,16 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     <div style="height:16px"></div>
   </div>
 </div>
- 
+
 </div><!-- /app -->
 <script>
 const C=[{h:1,p:3,y:155,hcp:13},{h:2,p:4,y:402,hcp:9},{h:3,p:3,y:165,hcp:5},{h:4,p:4,y:377,hcp:1},{h:5,p:4,y:400,hcp:3},{h:6,p:4,y:304,hcp:17},{h:7,p:3,y:200,hcp:11},{h:8,p:5,y:546,hcp:15},{h:9,p:4,y:397,hcp:7}];
 let hole=1,mode='social',rec=false,rS=0,rI=null,gOn=true,bOn=false,pOn=false,tT=null;
 let clips={},hD={},tSc=null,tFir=null,tGir=null,tGd=null;
 let pendingClip=null; // holds clip being built through prompt flow
- 
+
 function init(){buildG();upH();}
- 
+
 function setMode(m){
   mode=m;
   document.getElementById('app').classList.toggle('bc',m==='broadcast');
@@ -510,8 +522,11 @@ function setMode(m){
   document.getElementById('bbc').className='mb'+(m==='broadcast'?' ab':'');
   document.getElementById('mbadge').textContent=m==='social'?'SOCIAL · 9:16':'BROADCAST · 16:9';
   toast(m==='social'?'📱 Social — 9:16 vertical':'📹 Broadcast — 16:9 Top Tracer compatible');
+  // Hide rotate prompt if switching to social
+  if(m==='social') document.getElementById('rotate-prompt').style.display='none';
+  else setTimeout(checkOrientation, 100);
 }
- 
+
 function upH(){
   const h=C[hole-1];
   document.getElementById('hpn').textContent=hole;
@@ -521,7 +536,7 @@ function upH(){
   document.getElementById('hbadge').textContent='Hole '+hole;
   upCI();upDB();
 }
- 
+
 function buildG(){
   const g=document.getElementById('hgrid');g.innerHTML='';
   C.forEach(h=>{
@@ -532,7 +547,7 @@ function buildG(){
     g.appendChild(c);
   });
 }
- 
+
 function pickH(n){
   hole=n;buildG();upH();resetGeo();
   const h=C[n-1];
@@ -540,14 +555,14 @@ function pickH(n){
   toast('Hole '+n);
   setTimeout(()=>cls('hov'),600);
 }
- 
+
 function openH(){
   buildG();
   const h=C[hole-1];
   document.getElementById('hdet').textContent=`Hole ${hole} · Par ${h.p} · ${h.y} yds · Hcp ${h.hcp}`;
   opn('hov');
 }
- 
+
 function gTag(t){
   const btn=document.getElementById(t==='ball'?'bb2':'pb2');
   btn.classList.add('pulse');
@@ -571,7 +586,7 @@ function gTag(t){
     document.getElementById('dp').classList.add('show');
   }
 }
- 
+
 function resetGeo(){
   bOn=false;pOn=false;
   ['bb2','pb2'].forEach(id=>{
@@ -582,7 +597,7 @@ function resetGeo(){
   document.getElementById('pv').textContent='TAP';
   document.getElementById('dp').classList.remove('show');
 }
- 
+
 // ── RECORD ──
 function togR(){
   const btn=document.getElementById('rb');
@@ -609,7 +624,7 @@ function togR(){
     opn('prom1');
   }
 }
- 
+
 // ── PROMPT 1: Starting position ──
 function tagStart(){
   // Simulate GPS tag of starting position
@@ -624,7 +639,7 @@ function tagStart(){
   document.getElementById('start-coords').textContent=lat+', '+lng;
   opn('prom2');
 }
- 
+
 function skipStart(){
   pendingClip.startTagged=false;
   safeClose('prom1');
@@ -632,7 +647,7 @@ function skipStart(){
   // Hide confirm banner
   document.getElementById('start-confirm').style.display='none';
 }
- 
+
 // ── PROMPT 2: Distance ──
 function geoDistance(){
   safeClose('prom2');
@@ -643,14 +658,14 @@ function geoDistance(){
   finalizeClip();
   toast('✅ Distance tagged: '+dist+' yds');
 }
- 
+
 function manualDistance(){
   safeClose('prom2');
   document.getElementById('dist-input').value='';
   opn('prom3');
   setTimeout(()=>document.getElementById('dist-input').focus(),300);
 }
- 
+
 function confirmManual(){
   const val=parseInt(document.getElementById('dist-input').value);
   if(!val||val<1||val>800){toast('Enter a valid distance','w');return;}
@@ -659,11 +674,11 @@ function confirmManual(){
   finalizeClip();
   toast('✅ '+val+' yds logged');
 }
- 
+
 function skipDistance(){safeClose('prom2');safeClose('prom3');openContext();}
 function skipToContext(){safeClose('prom3');openContext();}
 function safeClose(id){const el=document.getElementById(id);if(el){el.classList.remove('show');el.classList.remove('open');}}
- 
+
 function finalizeClip(){
   if(!clips[hole])clips[hole]=[];
   clips[hole].push({...pendingClip});
@@ -677,12 +692,12 @@ function finalizeClip(){
     setTimeout(()=>document.getElementById('dp').classList.remove('show'),3000);
   }
 }
- 
+
 function upCI(){
   const el=document.getElementById('ci');
   el.innerHTML=(clips[hole]||[]).map(()=>'<div class="cd"></div>').join('');
 }
- 
+
 // ── DATA SHEET ──
 function openD(){
   const d=hD[hole]||{};
@@ -694,7 +709,7 @@ function openD(){
   buildRows();
   opn('dov');
 }
- 
+
 function buildRows(){
   const c=document.getElementById('srows');
   const hc=clips[hole]||[];
@@ -713,10 +728,10 @@ function buildRows(){
       </div></div></div>`;
   }).join('');
 }
- 
+
 function pC(i,v){if(!hD[hole])hD[hole]={};if(!hD[hole].shots)hD[hole].shots=[];if(!hD[hole].shots[i])hD[hole].shots[i]={};hD[hole].shots[i].club=v;document.querySelectorAll('#cr'+i+' .ch').forEach(c=>c.classList.toggle('on',c.textContent===v));}
 function pL(i,v){if(!hD[hole])hD[hole]={};if(!hD[hole].shots)hD[hole].shots=[];if(!hD[hole].shots[i])hD[hole].shots[i]={};hD[hole].shots[i].lie=v;document.querySelectorAll('#lr'+i+' .li').forEach(c=>c.classList.toggle('on',c.textContent===v));}
- 
+
 function adj(d){const h=C[hole-1];if(tSc===null)tSc=h.p;tSc=Math.max(1,Math.min(12,tSc+d));upSc();}
 function upSc(){
   const h=C[hole-1];const el=document.getElementById('sn');const lb=document.getElementById('slb');
@@ -729,31 +744,31 @@ function upSc(){
   else if(diff===2){lb.textContent='Double';lb.style.color='var(--rd)';}
   else{lb.textContent='+'+diff;lb.style.color='var(--rd)';}
 }
- 
+
 function pk(type,val,el){
   if(type==='fir'){tFir=val;document.querySelectorAll('#firtri .tb').forEach(b=>b.className='tb');el.classList.add(val==='hit'?'hit':'miss');}
   if(type==='gir'){tGir=val;document.querySelectorAll('#girtri .tb').forEach(b=>b.className='tb');el.classList.add(val==='hit'?'hit':'miss');document.getElementById('girdir').style.display=val==='miss'?'grid':'none';}
   if(type==='gd'){tGd=val;document.querySelectorAll('#girdir .tb').forEach(b=>b.className='tb');el.classList.add('miss');}
 }
- 
+
 function save(){
   if(!hD[hole])hD[hole]={};
   hD[hole].score=tSc;hD[hole].fir=tFir;hD[hole].gir=tGir;hD[hole].gd=tGd;
   upDB();cls('dov');toast('✅ Hole '+hole+' saved');
   if(hole<9){setTimeout(()=>{hole++;upH();resetGeo();toast('→ Hole '+hole);},1200);}
 }
- 
+
 function upDB(){const d=hD[hole];const has=d&&(d.score!==null||d.fir||d.gir);document.getElementById('db').classList.toggle('on',!!has);}
 function togG(){gOn=!gOn;document.getElementById('guides').style.opacity=gOn?'1':'0';document.getElementById('gb').classList.toggle('on',gOn);toast(gOn?'⊞ Guides on':'⊟ Guides off');}
 function opn(id){document.getElementById(id).classList.add('show');}
 function cls(id){document.getElementById(id).classList.remove('show','open');document.getElementById(id).classList.remove('show');}
 function mayC(e,id){if(e.target===document.getElementById(id)){document.getElementById(id).classList.remove('open');}}
 function toast(msg,w){const t=document.getElementById('toast');if(tT)clearTimeout(tT);t.textContent=msg;t.className='show'+(w?' w':'');tT=setTimeout(()=>t.className='',2200);}
- 
+
 // Fix: sheets use 'open' class, prompts use 'show' class
 function opn(id){const el=document.getElementById(id);if(el.classList.contains('prom-overlay'))el.classList.add('show');else el.classList.add('open');}
 function cls(id){const el=document.getElementById(id);el.classList.remove('show');el.classList.remove('open');}
- 
+
 init();
 </script>
 </body>
@@ -771,7 +786,7 @@ init();
     toast('📍 Distance tagged: '+dist+' yds');
     openContext();
   };
- 
+
   // Override confirmManual
   window.confirmManual = function(){
     const val=parseInt(document.getElementById('dist-input').value);
@@ -782,12 +797,12 @@ init();
     openContext();
   };
 })();
- 
+
 // ── CONTEXT SCREEN ──
 let golferName = localStorage.getItem('golferName') || '';
 let selectedClubCtx = null;
 let selectedShotNum = null;
- 
+
 function openContext(){
   // Build hole buttons
   const holeRow = document.getElementById('ctx-hole-row');
@@ -804,11 +819,11 @@ function openContext(){
     };
     holeRow.appendChild(btn);
   });
- 
+
   // Golfer
   document.getElementById('ctx-golfer-display').textContent = golferName || 'Tap Edit to add';
   document.getElementById('golfer-input').style.display = 'none';
- 
+
   // Club chips
   const clubs = ['Driver','3 Wood','5 Wood','4 Iron','5 Iron','6 Iron','7 Iron','8 Iron','9 Iron','PW','GW','SW','LW','Putter'];
   const clubRow = document.getElementById('ctx-club-row');
@@ -825,21 +840,21 @@ function openContext(){
     };
     clubRow.appendChild(chip);
   });
- 
+
   // Shot number
   selectedShotNum = null;
   document.querySelectorAll('.ctx-shot-btn').forEach(b => b.classList.remove('on'));
- 
+
   opn('prom4');
 }
- 
+
 function editGolfer(){
   const input = document.getElementById('golfer-input');
   input.style.display = 'block';
   input.value = golferName;
   input.focus();
 }
- 
+
 function saveGolfer(){
   const input = document.getElementById('golfer-input');
   const val = input.value.trim();
@@ -850,13 +865,13 @@ function saveGolfer(){
   }
   input.style.display = 'none';
 }
- 
+
 function pickShot(el, num){
   document.querySelectorAll('.ctx-shot-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   selectedShotNum = num;
 }
- 
+
 function saveContext(){
   if(pendingClip){
     pendingClip.golfer = golferName;
@@ -868,7 +883,7 @@ function saveContext(){
   finalizeClip();
   toast('✅ Shot tagged');
 }
- 
+
 function skipContext(){
   safeClose('prom4');
   finalizeClip();
@@ -877,26 +892,26 @@ function skipContext(){
 <script>
 // ── REVIEW SCREEN ──
 let editingClipRef = null;
- 
+
 function openReview(){
   const list = document.getElementById('review-list');
   list.innerHTML = '';
- 
+
   // Gather all clips across all holes
   let total = 0;
   let hasAny = false;
- 
+
   C.forEach(h => {
     const holeClips = clips[h.h] || [];
     if(!holeClips.length) return;
     hasAny = true;
- 
+
     // Hole label
     const lbl = document.createElement('div');
     lbl.className = 'review-hole-label';
     lbl.textContent = 'Hole ' + h.h + ' · Par ' + h.p;
     list.appendChild(lbl);
- 
+
     holeClips.forEach((clip, i) => {
       total++;
       const card = document.createElement('div');
@@ -925,26 +940,26 @@ function openReview(){
       list.appendChild(card);
     });
   });
- 
+
   if(!hasAny){
     list.innerHTML = '<div class="review-empty">No clips captured yet.<br>Film a shot to get started.</div>';
   }
- 
+
   document.getElementById('review-count').textContent = total + (total===1?' clip':' clips');
   document.getElementById('dov').classList.add('open');
 }
- 
+
 function ordinal(n){
   const s=['th','st','nd','rd'];
   const v=n%100;
   return n+(s[(v-20)%10]||s[v]||s[0]);
 }
- 
+
 // ── SHOT DETAIL ──
 function openDetail(holeNum, clipIdx){
   const clip = clips[holeNum][clipIdx];
   editingClipRef = {holeNum, clipIdx};
- 
+
   const h = C[holeNum-1];
   document.getElementById('detail-title').textContent = 'Shot ' + (clipIdx+1);
   document.getElementById('detail-hole-badge').textContent = 'Hole ' + holeNum;
@@ -952,7 +967,7 @@ function openDetail(holeNum, clipIdx){
   document.getElementById('detail-dist').textContent = clip.dist || '—';
   document.getElementById('detail-dist-unit').textContent = clip.dist ? 'yds' : '';
   document.getElementById('detail-dur').textContent = clip.dur || '—';
- 
+
   // Club chips
   const clubs = ['Driver','3 Wood','5 Wood','4 Iron','5 Iron','6 Iron','7 Iron','8 Iron','9 Iron','PW','GW','SW','LW','Putter'];
   const row = document.getElementById('detail-club-row');
@@ -967,36 +982,36 @@ function openDetail(holeNum, clipIdx){
     };
     row.appendChild(chip);
   });
- 
+
   // Shot number
   document.querySelectorAll('#detail-shot-row .ctx-shot-btn').forEach((btn, idx) => {
     btn.classList.toggle('on', (idx+1) === clip.shotNum);
   });
- 
+
   document.getElementById('shot-detail-ov').classList.add('open');
 }
- 
+
 function editShot(el, num){
   document.querySelectorAll('#detail-shot-row .ctx-shot-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
 }
- 
+
 function saveDetail(){
   if(!editingClipRef) return;
   const {holeNum, clipIdx} = editingClipRef;
   const clip = clips[holeNum][clipIdx];
- 
+
   // Save club
   const selectedChip = document.querySelector('#detail-club-row .ch.on');
   if(selectedChip) clip.club = selectedChip.textContent;
- 
+
   // Save shot number
   const selectedShot = document.querySelector('#detail-shot-row .ctx-shot-btn.on');
   if(selectedShot){
     const map = {'1st':1,'2nd':2,'3rd':3,'4th':4,'5th+':5};
     clip.shotNum = map[selectedShot.textContent];
   }
- 
+
   document.getElementById('shot-detail-ov').classList.remove('open');
   openReview(); // Refresh the list
   toast('✅ Shot updated');
@@ -1011,21 +1026,21 @@ if('serviceWorker' in navigator){
       .catch(e => console.log('SW failed:', e));
   });
 }
- 
+
 // ── REAL CAMERA ACCESS ──
 let cameraStream = null;
 let currentFacing = 'environment'; // back camera by default
- 
+
 async function startCamera(){
   const video = document.getElementById('camera-stream');
   const fallbacks = ['vf-fallback','vf-fallback2','vf-fallback3'];
- 
+
   try {
     // Stop any existing stream
     if(cameraStream){
       cameraStream.getTracks().forEach(t => t.stop());
     }
- 
+
     const constraints = {
       video: {
         facingMode: currentFacing,
@@ -1034,19 +1049,19 @@ async function startCamera(){
       },
       audio: true // capture audio for future voice logging
     };
- 
+
     cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = cameraStream;
- 
+
     // Hide fallback scene
     fallbacks.forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
- 
+
     video.style.display = 'block';
     console.log('Camera started');
- 
+
   } catch(err) {
     console.error('Camera error:', err);
     // Show helpful message based on error
@@ -1064,7 +1079,7 @@ async function startCamera(){
     });
   }
 }
- 
+
 function stopCamera(){
   if(cameraStream){
     cameraStream.getTracks().forEach(t => t.stop());
@@ -1073,61 +1088,94 @@ function stopCamera(){
   const video = document.getElementById('camera-stream');
   video.srcObject = null;
 }
- 
+
 // Start camera when page loads
 window.addEventListener('load', () => {
-  // Small delay to let the page render first
   setTimeout(startCamera, 500);
 });
- 
+
+// Restart camera when returning to app (fixes black screen)
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible'){
+    setTimeout(startCamera, 300);
+  } else {
+    stopCamera();
+  }
+});
+
+// Also restart on page focus
+window.addEventListener('focus', () => {
+  if(!cameraStream || !cameraStream.active){
+    setTimeout(startCamera, 300);
+  }
+});
+
+// ── ORIENTATION DETECTION ──
+function checkOrientation(){
+  const isBroadcast = document.getElementById('app').classList.contains('bc');
+  const isLandscape = window.innerWidth > window.innerHeight;
+
+  if(isBroadcast && !isLandscape){
+    // Show rotate prompt
+    document.getElementById('rotate-prompt').style.display = 'flex';
+  } else {
+    document.getElementById('rotate-prompt').style.display = 'none';
+  }
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => {
+  setTimeout(checkOrientation, 300);
+});
+
 // ── VIDEO RECORDING ──
 let mediaRecorder = null;
 let recordedChunks = [];
- 
+
 async function startRecording(){
   if(!cameraStream){
     toast('📷 Camera not ready', true);
     return false;
   }
- 
+
   try {
     recordedChunks = [];
- 
+
     // Use MP4 if supported, fallback to webm
     const mimeType = MediaRecorder.isTypeSupported('video/mp4')
       ? 'video/mp4'
       : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
       ? 'video/webm;codecs=vp9'
       : 'video/webm';
- 
+
     mediaRecorder = new MediaRecorder(cameraStream, { mimeType });
- 
+
     mediaRecorder.ondataavailable = e => {
       if(e.data && e.data.size > 0){
         recordedChunks.push(e.data);
       }
     };
- 
+
     mediaRecorder.onstop = saveRecording;
     mediaRecorder.start(1000); // collect data every second
     return true;
- 
+
   } catch(err) {
     console.error('Recording error:', err);
     toast('Recording failed: ' + err.message, true);
     return false;
   }
 }
- 
+
 function stopRecording(){
   if(mediaRecorder && mediaRecorder.state !== 'inactive'){
     mediaRecorder.stop();
   }
 }
- 
+
 function saveRecording(){
   if(!recordedChunks.length) return;
- 
+
   const mimeType = mediaRecorder.mimeType || 'video/webm';
   const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
   const blob = new Blob(recordedChunks, { type: mimeType });
@@ -1135,13 +1183,13 @@ function saveRecording(){
   const dur = document.getElementById('rt').textContent;
   const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
   const filename = `VideoCaddy_H${hole}_${ts}.${ext}`;
- 
+
   // Save to device
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
- 
+
   // Store clip reference
   if(!clips[hole]) clips[hole] = [];
   pendingClip = {
@@ -1152,10 +1200,10 @@ function saveRecording(){
     filename,
     ts: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
   };
- 
+
   URL.revokeObjectURL(url);
   recordedChunks = [];
- 
+
   // Show post-record prompt
   document.getElementById('pdur').textContent = dur;
   const pm = document.getElementById('pmode');
@@ -1163,12 +1211,12 @@ function saveRecording(){
   pm.className = 'pmb ' + mode;
   opn('prom1');
 }
- 
+
 // Override togR to use real recording
 window.togR = async function(){
   const btn = document.getElementById('rb');
   rec = !rec;
- 
+
   if(rec){
     const started = await startRecording();
     if(!started){ rec = false; return; }
@@ -1188,4 +1236,3 @@ window.togR = async function(){
   }
 };
 </script>
- 
