@@ -57,8 +57,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .gc.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}.gc.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
 .gc.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}.gc.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
 .gtgt{position:absolute;width:1px;background:linear-gradient(180deg,transparent,rgba(255,107,26,.35),rgba(255,107,26,.65));transition:all .4s;}
-#app:not(.landscape) .gtgt{left:28%;top:20%;bottom:0;}
-#app.landscape .gtgt{left:30%;top:10%;bottom:0;}
+#app:not(.landscape) .gtgt{left:50%;top:20%;bottom:0;}
+#app.landscape .gtgt{left:50%;top:10%;bottom:0;}
 .gtgt::before{content:'▼ PIN';position:absolute;top:-16px;left:4px;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--or);white-space:nowrap;}
 
 /* CLIPS INDICATOR */
@@ -465,7 +465,13 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
     </div>
     <div class="shs">
       <div class="shl">Golfer</div>
-      <div style="font-size:15px;font-weight:600;color:var(--tx)" id="detail-golfer">—</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:15px;font-weight:600;color:var(--tx);flex:1;" id="detail-golfer">—</div>
+        <div class="ctx-edit-btn" onclick="editDetailGolfer()">Edit</div>
+      </div>
+      <input id="detail-golfer-input" type="text" placeholder="Enter name..."
+        style="display:none;margin-top:8px;background:var(--s2);border:1px solid var(--bb);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:14px;width:100%;outline:none;"
+        onblur="saveDetailGolfer()" onkeydown="if(event.key==='Enter')saveDetailGolfer()"/>
     </div>
     <div class="shs">
       <div class="shl">Club</div>
@@ -935,14 +941,13 @@ function openReview(){
         <div class="review-card-num">${i+1}</div>
         <div class="review-card-body">
           <div class="review-card-top">
-            <div class="review-card-club">${clip.club || 'No club'}</div>
-            <div class="review-card-golfer">${clip.golfer || ''}</div>
+            <div class="review-card-club">${clip.golfer || 'Unknown Golfer'}</div>
           </div>
           <div class="review-card-meta">
-            ${clip.shotNum ? ordinal(clip.shotNum)+' shot' : ''} 
-            ${clip.startTagged ? '· 📍 GPS' : ''} 
-            · ${clip.ts}
-            · ${clip.dur}
+            Hole ${h.h}
+            ${clip.shotNum ? '· ' + ordinal(clip.shotNum) + ' shot' : ''}
+            ${clip.club ? '· ' + clip.club : ''}
+            ${clip.startTagged ? '· 📍' : ''}
           </div>
         </div>
         <div>
@@ -1011,10 +1016,33 @@ function editShot(el, num){
   el.classList.add('on');
 }
 
+function editDetailGolfer(){
+  const input = document.getElementById('detail-golfer-input');
+  input.style.display = 'block';
+  input.value = document.getElementById('detail-golfer').textContent === '—' ? '' : document.getElementById('detail-golfer').textContent;
+  input.focus();
+}
+
+function saveDetailGolfer(){
+  const input = document.getElementById('detail-golfer-input');
+  const val = input.value.trim();
+  if(val){
+    document.getElementById('detail-golfer').textContent = val;
+    // Also update global golfer name and save to storage
+    golferName = val;
+    localStorage.setItem('golferName', val);
+  }
+  input.style.display = 'none';
+}
+
 function saveDetail(){
   if(!editingClipRef) return;
   const {holeNum, clipIdx} = editingClipRef;
   const clip = clips[holeNum][clipIdx];
+
+  // Save golfer
+  const golferEl = document.getElementById('detail-golfer');
+  if(golferEl && golferEl.textContent !== '—') clip.golfer = golferEl.textContent;
 
   // Save club
   const selectedChip = document.querySelector('#detail-club-row .ch.on');
@@ -1028,7 +1056,7 @@ function saveDetail(){
   }
 
   document.getElementById('shot-detail-ov').classList.remove('open');
-  openReview(); // Refresh the list
+  openReview();
   toast('✅ Shot updated');
 }
 </script>
