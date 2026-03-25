@@ -189,6 +189,21 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 .sv:active{transform:scale(.97);background:#0f6e2e;}
 
 /* TOAST */
+/* SHOT TAGS */
+.shot-tag-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.shot-tag-btn{background:var(--s2);border:1.5px solid var(--br);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;}
+.shot-tag-btn:active{transform:scale(.92);}
+.shot-tag-btn.on{border-color:var(--gr);background:rgba(29,185,84,.12);}
+.tag-emoji{font-size:20px;line-height:1;}
+.tag-label{font-size:9px;font-weight:700;color:var(--td);letter-spacing:.5px;text-align:center;}
+.shot-tag-btn.on .tag-label{color:var(--gr);}
+
+/* SHOT NUMBER SCROLL */
+.shot-num-scroll{display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--br);border-radius:12px;padding:8px 14px;}
+.shot-num-btn{width:32px;height:32px;border-radius:50%;background:var(--s3);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--td);cursor:pointer;transition:all .15s;flex-shrink:0;}
+.shot-num-btn:active{transform:scale(.88);background:var(--s2);}
+.shot-num-display{flex:1;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--or);line-height:1;}
+
 /* CONTEXT SCREEN */
 .ctx-section{padding:10px 0;border-bottom:1px solid var(--br);}
 .ctx-section:last-of-type{border-bottom:none;}
@@ -392,15 +407,25 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
         <div class="chip-row2" id="ctx-club-row"></div>
       </div>
 
-      <!-- Shot Number -->
+      <!-- Shot Tag -->
       <div class="ctx-section">
-        <div class="ctx-lbl">Shot Number</div>
-        <div class="ctx-shot-row" id="ctx-shot-row">
-          <div class="ctx-shot-btn" onclick="pickShot(this,1)">1st</div>
-          <div class="ctx-shot-btn" onclick="pickShot(this,2)">2nd</div>
-          <div class="ctx-shot-btn" onclick="pickShot(this,3)">3rd</div>
-          <div class="ctx-shot-btn" onclick="pickShot(this,4)">4th</div>
-          <div class="ctx-shot-btn" onclick="pickShot(this,5)">5th+</div>
+        <div class="ctx-lbl">Shot Tag</div>
+        <div class="shot-tag-grid" id="ctx-shot-tag-row">
+          <div class="shot-tag-btn" onclick="pickTag(this,'Bombed')"><span class="tag-emoji">💣</span><span class="tag-label">Bombed</span></div>
+          <div class="shot-tag-btn" onclick="pickTag(this,'Silky')"><span class="tag-emoji">🕸️</span><span class="tag-label">Silky</span></div>
+          <div class="shot-tag-btn" onclick="pickTag(this,'Buttery')"><span class="tag-emoji">🧈</span><span class="tag-label">Buttery</span></div>
+          <div class="shot-tag-btn" onclick="pickTag(this,'Drained')"><span class="tag-emoji">🤛</span><span class="tag-label">Drained</span></div>
+          <div class="shot-tag-btn" onclick="pickTag(this,'Duff')"><span class="tag-emoji">😂</span><span class="tag-label">Duff</span></div>
+        </div>
+      </div>
+
+      <!-- Shot Number — scroll -->
+      <div class="ctx-section">
+        <div class="ctx-lbl">Shot Number <span style="color:var(--tm);font-weight:400;letter-spacing:0;text-transform:none;font-size:9px;">— optional</span></div>
+        <div class="shot-num-scroll">
+          <div class="shot-num-btn" onclick="scrollShot(-1)">‹</div>
+          <div class="shot-num-display" id="shot-num-display">—</div>
+          <div class="shot-num-btn" onclick="scrollShot(1)">›</div>
         </div>
       </div>
 
@@ -823,6 +848,9 @@ init();
 let golferName = localStorage.getItem('golferName') || '';
 let selectedClubCtx = null;
 let selectedShotNum = null;
+let selectedShotTag = null;
+const shotNumOptions = ['—', '1st', '2nd', '3rd', '4th', '5th+'];
+let shotNumIdx = 0;
 
 function openContext(){
   // Build hole buttons
@@ -862,9 +890,14 @@ function openContext(){
     clubRow.appendChild(chip);
   });
 
-  // Shot number
+  // Shot tag
+  selectedShotTag = null;
+  document.querySelectorAll('.shot-tag-btn').forEach(b => b.classList.remove('on'));
+
+  // Shot number scroll
   selectedShotNum = null;
-  document.querySelectorAll('.ctx-shot-btn').forEach(b => b.classList.remove('on'));
+  shotNumIdx = 0;
+  document.getElementById('shot-num-display').textContent = '—';
 
   opn('prom4');
 }
@@ -887,10 +920,17 @@ function saveGolfer(){
   input.style.display = 'none';
 }
 
-function pickShot(el, num){
-  document.querySelectorAll('.ctx-shot-btn').forEach(b => b.classList.remove('on'));
+function pickTag(el, tag){
+  document.querySelectorAll('.shot-tag-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
-  selectedShotNum = num;
+  selectedShotTag = tag;
+}
+
+function scrollShot(dir){
+  shotNumIdx = Math.max(0, Math.min(shotNumOptions.length - 1, shotNumIdx + dir));
+  const val = shotNumOptions[shotNumIdx];
+  document.getElementById('shot-num-display').textContent = val;
+  selectedShotNum = val === '—' ? null : val;
 }
 
 function saveContext(){
@@ -898,6 +938,7 @@ function saveContext(){
     pendingClip.golfer = golferName;
     pendingClip.club = selectedClubCtx;
     pendingClip.shotNum = selectedShotNum;
+    pendingClip.shotTag = selectedShotTag;
     pendingClip.hole = hole;
   }
   safeClose('prom4');
@@ -942,6 +983,7 @@ function openReview(){
         <div class="review-card-body">
           <div class="review-card-top">
             <div class="review-card-club">${clip.golfer || 'Unknown Golfer'}</div>
+            ${clip.shotTag ? `<div style="font-size:11px;background:rgba(29,185,84,.1);border:1px solid var(--br);border-radius:10px;padding:2px 8px;color:var(--gr);font-weight:600;">${clip.shotTag}</div>` : ''}
           </div>
           <div class="review-card-meta">
             Hole ${h.h}
