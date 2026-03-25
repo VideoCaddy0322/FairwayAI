@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>FairwayAI</title>
+<meta name="apple-mobile-web-app-title" content="VideoCaddyAI">
+<title>VideoCaddyAI</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -248,7 +251,14 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Outfit',
 
 <!-- VIEWFINDER -->
 <div id="vf">
-  <div class="vb"></div><div class="vsk"></div><div class="vgr"></div>
+<!-- REAL CAMERA STREAM -->
+  <video id="camera-stream" autoplay playsinline muted
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000;">
+  </video>
+  <!-- Fallback scene shown until camera starts -->
+  <div class="vb" id="vf-fallback"></div>
+  <div class="vsk" id="vf-fallback2"></div>
+  <div class="vgr" id="vf-fallback3"></div>
   <div class="mbadge" id="mbadge">SOCIAL · 9:16</div>
 
   <div id="guides">
@@ -991,4 +1001,190 @@ function saveDetail(){
   openReview(); // Refresh the list
   toast('✅ Shot updated');
 }
+</script>
+<script>
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW failed:', e));
+  });
+}
+
+// ── REAL CAMERA ACCESS ──
+let cameraStream = null;
+let currentFacing = 'environment'; // back camera by default
+
+async function startCamera(){
+  const video = document.getElementById('camera-stream');
+  const fallbacks = ['vf-fallback','vf-fallback2','vf-fallback3'];
+
+  try {
+    // Stop any existing stream
+    if(cameraStream){
+      cameraStream.getTracks().forEach(t => t.stop());
+    }
+
+    const constraints = {
+      video: {
+        facingMode: currentFacing,
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: true // capture audio for future voice logging
+    };
+
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = cameraStream;
+
+    // Hide fallback scene
+    fallbacks.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+
+    video.style.display = 'block';
+    console.log('Camera started');
+
+  } catch(err) {
+    console.error('Camera error:', err);
+    // Show helpful message based on error
+    if(err.name === 'NotAllowedError'){
+      toast('📷 Camera permission denied — check Settings', true);
+    } else if(err.name === 'NotFoundError'){
+      toast('📷 No camera found on this device', true);
+    } else {
+      toast('📷 Camera unavailable — using preview mode', true);
+    }
+    // Keep fallback scene visible
+    fallbacks.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = '';
+    });
+  }
+}
+
+function stopCamera(){
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  const video = document.getElementById('camera-stream');
+  video.srcObject = null;
+}
+
+// Start camera when page loads
+window.addEventListener('load', () => {
+  // Small delay to let the page render first
+  setTimeout(startCamera, 500);
+});
+
+// ── VIDEO RECORDING ──
+let mediaRecorder = null;
+let recordedChunks = [];
+
+async function startRecording(){
+  if(!cameraStream){
+    toast('📷 Camera not ready', true);
+    return false;
+  }
+
+  try {
+    recordedChunks = [];
+
+    // Use MP4 if supported, fallback to webm
+    const mimeType = MediaRecorder.isTypeSupported('video/mp4')
+      ? 'video/mp4'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : 'video/webm';
+
+    mediaRecorder = new MediaRecorder(cameraStream, { mimeType });
+
+    mediaRecorder.ondataavailable = e => {
+      if(e.data && e.data.size > 0){
+        recordedChunks.push(e.data);
+      }
+    };
+
+    mediaRecorder.onstop = saveRecording;
+    mediaRecorder.start(1000); // collect data every second
+    return true;
+
+  } catch(err) {
+    console.error('Recording error:', err);
+    toast('Recording failed: ' + err.message, true);
+    return false;
+  }
+}
+
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+    mediaRecorder.stop();
+  }
+}
+
+function saveRecording(){
+  if(!recordedChunks.length) return;
+
+  const mimeType = mediaRecorder.mimeType || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+  const blob = new Blob(recordedChunks, { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const dur = document.getElementById('rt').textContent;
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  const filename = `VideoCaddy_H${hole}_${ts}.${ext}`;
+
+  // Save to device
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  // Store clip reference
+  if(!clips[hole]) clips[hole] = [];
+  pendingClip = {
+    dur,
+    dist: null,
+    distTagged: false,
+    startTagged: false,
+    filename,
+    ts: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+  };
+
+  URL.revokeObjectURL(url);
+  recordedChunks = [];
+
+  // Show post-record prompt
+  document.getElementById('pdur').textContent = dur;
+  const pm = document.getElementById('pmode');
+  pm.textContent = mode.toUpperCase();
+  pm.className = 'pmb ' + mode;
+  opn('prom1');
+}
+
+// Override togR to use real recording
+window.togR = async function(){
+  const btn = document.getElementById('rb');
+  rec = !rec;
+
+  if(rec){
+    const started = await startRecording();
+    if(!started){ rec = false; return; }
+    btn.classList.add('rec');
+    rS = 0;
+    rI = setInterval(()=>{
+      rS++;
+      const m=String(Math.floor(rS/60)).padStart(2,'0'),s=String(rS%60).padStart(2,'0');
+      document.getElementById('rt').textContent=m+':'+s;
+    },1000);
+    toast('🔴 Recording');
+  } else {
+    btn.classList.remove('rec');
+    clearInterval(rI);
+    stopRecording();
+    // saveRecording() is called automatically via mediaRecorder.onstop
+  }
+};
 </script>
