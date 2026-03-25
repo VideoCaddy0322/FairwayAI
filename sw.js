@@ -1,5 +1,5 @@
 // FairwayAI Service Worker
-const CACHE_NAME = 'fairwayai-v3';
+const CACHE_NAME = 'fairwayai-v4';
 const ASSETS = [
   '/FairwayAI/',
   '/FairwayAI/index.html',
