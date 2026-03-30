@@ -1,0 +1,26 @@
+{
+  "name": "fairwayai",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VideoCaddy0322/FairwayAI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VideoCaddy0322/FairwayAI/issues"
+  },
+  "homepage": "https://github.com/VideoCaddy0322/FairwayAI#readme",
+  "dependencies": {
+    "@capacitor/camera": "^8.0.2",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/geolocation": "^8.1.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "ai.echosports.app",
+  "appName": "Echo Sports",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always"
+  }
+}
